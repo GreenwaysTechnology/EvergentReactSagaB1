@@ -1,0 +1,557 @@
+
+ES 1
+ES 3
+ES 4
+ES 5
+ES 6
+ES 7
+....
+ES - ECMA Script
+
+What is ES 6?
+
+ Version
+
+es 2012-----es 2015
+
+JS 
+1.language fundamentals
+  var,this  - es 5
+  let,const -es 6 replacement of var
+  literals
+    -number
+    -string - "",'',=> `${variable}`
+    -boolean
+    -object 
+
+2.functions
+     -arrow functions
+3.object based features
+    -class
+    -object destrucing
+    .....
+4.dom programming
+5.network programming
+//////////////////////////////////////////////////////////////////////////////////////////
+
+ES 6 features:
+
+not supported in old browsers and node runtime
+
+how to achive browser compability?
+
+Transpiling : compilation--source code to source code compilation
+
+es6 ---transpil-es5---run on browsers
+
+transpilers;
+
+babel.js
+//////////////////////////////////////////////////////////////////////////////////////////
+
+lab:
+
+>npm install create-react-app -g
+
+>vs code
+
+sc
+function sayGreet(status) {
+    if (status) {
+        var message = 'Hello'
+    }
+    console.log(message);
+   // console.log(myvar)
+}
+
+parsing : lexcial parsing
+hoisting ;moving variables from block level to function level.
+
+function sayGreet(status) {
+    var message;
+    if (status) {
+       message= 'Hello'
+    }
+    console.log(message);
+   // console.log(myvar)
+}
+
+excutions starts
+
+use case block scope:
+
+/**
+ * let is similar to var
+ */
+
+let firstName = 'Subramanian';
+let lastName = "Murugan";
+
+console.log("firstName" + firstName)
+console.log("firstName", firstName)
+console.log(`Name ${firstName} ${lastName}`);
+
+//scope : block scope:js does not have block scope by default
+// let will keep the variables in block scope
+
+// function sayGreet(status) {
+//     if (status) {
+//         var message = 'Hello'
+//     }
+//     console.log(message);
+//    // console.log(myvar)
+// }
+function sayGreet(status) {
+    if (status) {
+        let message = 'Hello'
+    }
+    // console.log(message);
+    // console.log(myvar)
+}
+
+sayGreet(false);
+
+///////////////////////////////////////////////////////////////////////
+//const : similar to let
+
+let x = 10;
+console.log(x);
+x = "test";
+console.log(x);
+
+
+const pi = 3.14;
+console.log(pi)
+pi = 78.89;
+
+functions,parameters,default args,object destructing:
+//functions
+/**
+ * function declaration
+ * 1.normal
+ * 2.literal declaration
+ */
+//args
+//es 6 default args
+function sayHello(name = 'default Name') {
+    //function body
+    console.log(`Hello ${name}`);
+}
+//function invocation
+sayHello('Subramanian');
+sayHello()//no param
+
+function multiply(a = 0, b = 0) {
+    return a * b;
+}
+console.log(multiply(10, 10));
+console.log(multiply());
+//////////////////////////////////////////////////////////////////////////////////
+//literal notation : es 5
+let add = function (a = 0, b = 0) {
+    return a + b;
+};
+console.log(add(10, 10))
+console.log(add())
+////////////////////////////////////////////////////////////////////////////////
+//Arrow functions : to replace es 5 literal notations
+
+// let greet = function () {
+//     console.log('Greet')
+// }
+//simple arrow
+// let greet = () => {
+//     console.log('Greet')
+// };
+// greet();
+//if function body has one line,remove {}
+let greet = () => console.log('Greet');
+greet();
+//parameters and args
+let calculateStock = (qty = 0, unitprice = 0) => {
+    let totalValue = qty * unitprice;
+    console.log(totalValue);
+}
+calculateStock(10, 10)
+
+//single parameter/arg without default args,drop ()
+let printMessage = message => console.log(message)
+printMessage('hello');
+
+//return values
+
+// let getValue = () => {
+//     return 10;
+// }
+
+//no body only return, remove {} and return statement
+// let getValue = () => 10;
+// console.log(getValue())
+
+//single parameter without default arg,return the same 
+let getValue = value => value;
+console.log(getValue(90))
+///////////////////////////////////////////////////////////////////////////////////
+
+//how to pass function as parameter
+
+// function connect(callback) {
+//     callback();
+// }
+// const sqlConnect = function () {
+//     console.log('sql Connect');
+// }
+// //function as parameter
+// connect(sqlConnect);
+
+// connect(function () {
+//     console.log('NoSql Connect')
+// });
+
+const connect = callback => callback('SQL Connect');
+
+const sqlConnect = connection => console.log(connection);
+
+//function as parameter
+connect(sqlConnect);
+
+connect(connection => console.log(connection));
+///////////////////////////////////////////////////////////////////////////////
+
+//how to return function from other other functions
+
+// function counter() {
+//     //return a function
+//     return function () {
+//         return 10;
+//     }
+// }
+// const counter = () => {
+//     //return a function
+//     return () => {
+//         return 10;
+//     }
+// }
+const counter = () => () => 10;
+// let inc = counter();
+// console.log(inc());
+console.log(counter()());
+
+/////////////////////////////////////////////////////////////////////////////////
+//How to return object literals from arrow
+
+// function getEmployee(employee) {
+//     console.log(employee);
+// }
+// getEmployee({
+//     id: 1,
+//     name: 'subramanian'
+// })
+const getEmployee = employee => console.log(employee);
+getEmployee({
+    id: 1,
+    name: 'subramanian'
+})
+/////////////////////////////////////////////////////////////////////////////////
+//how to return object
+// const getStocks = function () {
+//     return {
+//         symbol: 'GOL',
+//         qty: 10,
+//         price: 100
+//     }
+// };
+// const getStocks = () => {
+//     return {
+//         symbol: 'GOL',
+//         qty: 10,
+//         price: 100
+//     }
+// };
+const getStocks = () => ({
+    symbol: 'GOL',
+    qty: 10,
+    price: 100
+});
+
+console.log(getStocks());
+
+//how to initalize object property values dynamically
+//args variables are local variables
+//left side : instance variables
+//right side : local variables
+// const getStockValues = (symbol = 'GOL', qty = 0, price = 0) => ({
+//     symbol: symbol,
+//     qty: qty,
+//     price: price
+// });
+
+//if left: right is same, remove one
+const getStockValues = (symbol = 'GOL', qty = 0, price = 0) => ({
+    symbol,
+    qty,
+    price
+});
+
+console.log(getStockValues());
+console.log(getStockValues('EverGent', 1000, 2500));
+////////////////////////////////////////////////////////////////////////////////
+//Object destructuring
+
+// function getCustomer(customer) {
+//     console.log(`Customer Id ${customer.id}`)
+//     console.log(`Customer Name ${customer.name}`)
+// }
+//breaking object keys
+// function getCustomer(customer) {
+//     //destructure
+//     const { id, name } = customer;
+//     console.log(`Customer Id ${id}`)
+//     console.log(`Customer Name ${name}`)
+// }
+// function getCustomer({ id, name }) {
+//     //destructure
+//     console.log(`Customer Id ${id}`)
+//     console.log(`Customer Name ${name}`)
+// }
+// const getCustomer = ({ id, name, address }) => {
+//     //destructure
+//     console.log(`Customer Id ${id}`)
+//     console.log(`Customer Name ${name}`)
+//     console.log(`Customer Address ${address.city} ${address.state} `)
+
+// }
+const getCustomer = ({ id, name, address: { city, state } }) => {
+    //destructure
+    console.log(`Customer Id ${id}`)
+    console.log(`Customer Name ${name}`)
+    console.log(`Customer Address ${city} ${state} `)
+
+}
+getCustomer({
+    id: 1,
+    name: 'subramanian',
+    address: {
+        city: 'Coimbatore',
+        state: 'Tamil Nadu'
+    }
+});
+
+function logger(...logs) {
+    console.log(logs);
+}
+logger('waring', 'success');
+///////////////////////////////////////////////////////////////////////////////////////////
+
+object based features:
+
+function, literal
+
+
+
+/**
+ * Object creation
+ * 1.constructor patterns
+ *    functions
+ *    class -es 6
+ * 2.literal patterns
+ *   {}
+ */
+//es 5
+// function Employee(id = 1, name = 'defaultName') {
+//     //instance variables and methods
+//     this.id = id;//1;
+//     this.name = name;//'Subramanian'
+//     //methods
+//     this.calculateSalary = function () {
+//         return 100;
+//     }
+
+// }
+class Employee {
+    constructor(id = 1, name = 'defaultName') {
+        //instance variables
+        this.id = id;//1;
+        this.name = name;//'Subramanian'
+    }
+    //methods
+    calculateSalary() {
+        return 100;
+    }
+}
+let emp = new Employee(1, 'Subramanian');//constructor call
+console.log(`${emp.id} ${emp.name} ${emp.calculateSalary()}`);
+////////////////////////////////////////////////////////////////////////////
+
+//Object relationship : has-a, is-a 
+
+//has-a
+class Order {
+    //instance variables inside class
+    id;
+    value;
+    constructor(id = 'A001', value = 0.0) {
+        this.id = id;
+        this.value = value;
+    }
+}
+class Customer {
+    constructor(id = 1, name = 'defaultName', order = new Order()) {
+        //instance variables
+        this.id = id;//1;
+        this.name = name;//'Subramanian'
+        //has-a
+        this.order = order;
+    }
+
+}
+const cust = new Customer(1, 'Ram', new Order());
+console.log(`${cust.id} ${cust.name} ${cust.order.id} ${cust.order.value}`);
+
+//is-a inhertiance ; extends,super
+
+class Account {
+    constructor() {
+        console.log('Account class')
+        this.accountNo = 'A0001'
+    }
+    //methods
+    withdraw() {
+        return 100;
+    }
+}
+class SavingsAccount extends Account {
+    constructor() {
+        super();
+        console.log('Savings class')
+    }
+    //method redefining(overriding)
+    withdraw() {
+        return 100999 * super.withdraw();
+    }
+}
+let sb = new SavingsAccount();
+console.log(sb.accountNo)
+console.log(sb.withdraw());
+//////////////////////////////////////////////////////////////////////////////////
+//static variables
+class Message {
+    static success = 'OK!';
+}
+console.log(Message.success)
+//////////////////////////////////////////////////////////////////////////////
+
+//literal objects
+let product = {
+    id: 1,
+    name: 'Phone',
+    cost: 10
+};
+console.log(product);
+///////////////////////////////////////////////////////////////////////////////////////////////
+Modularity;
+sharing code among files.
+
+Modularity design patterns:
+
+1.namespace
+2.amd
+3.cjs
+4.es 6 
+5.system
+6.umd
+
+
+
+3.cjs - node js
+4.es 6 - every where.
+
+
+es6
+->how to link files
+    import
+->how to share code(variables,classes,functions)
+
+   export,export default
+
+ file1--sharing code---file 2 can get the code.
+
+
+
+application
+
+src
+   |
+   product
+	js files
+   customer
+	js files
+  entryfile(index)
+	
+
+/**
+ * two export default not allowed in single file but we can mix export and export default
+ */
+
+
+// export default class LoggerService {
+//     constructor() {
+//         console.log('Logger Service')
+//     }
+//  }
+export class LoggerFormatter {
+    constructor() {
+        console.log('LoggerFormatter')
+    }
+    format() {
+        return `Formatter api is called`
+    }
+}
+export default class LoggerService {
+    constructor() {
+        console.log('Logger Service')
+    }
+}
+// export default class LoggerFormatter {
+//     constructor() {
+//         console.log('LoggerFormatter')
+//     }
+// }
+//export default LoggerService;
+
+
+///
+barrel export:
+
+// import { SUCCESS, FAILURE, WARING } from './util/MessageUtil'
+// import { auth } from './util/authservice'
+// import { payment } from './util/payments'
+// import { rateLimiter } from './util/ratelimiter';
+import { SUCCESS, FAILURE, WARING, auth, payment, rateLimiter } from './util';
+
+import LoggerService, { LoggerFormatterService } from './services/LoggerService'
+//import { LoggerFormatterService, LoggerService } from './services'
+
+console.log(SUCCESS, FAILURE, WARING);
+console.log(auth('8888'))
+console.log(rateLimiter);
+
+new LoggerService();
+new LoggerFormatterService();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
