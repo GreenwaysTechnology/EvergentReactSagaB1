@@ -1,0 +1,1471 @@
+React:
+
+What is react?
+
+react is lib
+
+framework vs lib
+
+framework will give all in one place : one stop solution.
+lib solves only one problem.
+
+react is used to build browser based user interface application
+
+Browser based user interface application tech stack
+
+1.html
+2.css
+3.javascript.
+
+React features
+
+1.declarative lib
+2.Model muatation using functional programming principles
+3.rerendering cycles using v.dom
+4.single/one way data flow
+
+
+pl can be classified into
+
+1.declarative pl----libs/frameworks
+2.imperative pl---libs/frameworks
+
+1.Imperative
+   
+let customers = [{id:1,name:'a',city:'test'}];
+
+i want find out all customers in chennai city.
+
+function findCustomerByCity(city){
+  let result = [];
+ for(let i=0;i<customers.length;i++){
+    let customer  =customers[i];
+   //logic
+   if(customer.city === city){
+	  result.push(customer);
+   }
+
+}
+  return result
+}
+
+findCustomerByCity('chennai');
+
+
+2.Declarative
+
+function findCustomerByCity(city){
+     return customers.filter(customer=>customer.city == city);
+}
+
+findCustomerByCity('chennai');
+
+
+HTML is more declarative pl.
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+HTML:
+
+1.HTML IS PL? - YES
+2.HTML Is compiled -YES
+3.HTML is excuted-YES
+
+java
+  -source .java
+ -compile -.class -assembly
+ -excute -jvm--result
+
+
+index.html -source code
+
+<body>
+  <div>
+     <h1>Welcome</h1>
+  </div>
+</body>
+  |
+loader---LOAD Code into browser
+ |
+   from file: or http:
+ |
+ parser : parser is special compiler which converts source into lexcial tree(string tree)
+ |
+body
+  div
+     h1
+        Welcome 
+     h1
+  div
+body
+|
+ compilation : Convert this into assembly
+|
+body -load xxx
+  div
+     h1
+        Welcome 
+     h1
+  div
+body
+|
+ HTML Execution engine : Request Os ,to allocate memory :Runtime
+|
+-LinkedList
+body -Node
+  div -Node
+     h1 -Node
+        Welcome -Node
+     h1
+  div
+body
+| 
+ Linking the Nodes: Tree
+body  -Node
+  |
+  div -Node
+    |
+     h1 -Node
+      |
+        Welcome -Node
+        |
+     h1
+  div
+body
+ |
+Layout/Paint Engine: will convert nodes into pxs : final output
+..............................................................................................
+In 1996,Netscap communication,Started an RND project called "How to manipulate the tree"
+
+Tree is written in c language,then we need another c program to communicate.
+
+But NETSCAP decided not to use C pl.
+
+Netscap wanted to put java like implementation inside browser to manipulate "Tree".
+
+that is birth of javascript.
+
+How to access nodes from javascript engine?
+  
+One spec was published ,As per that spec
+ "Document Object Model"
+    -How to represent document(elements/nodes) in object oriented way.->DOM
+
+ "Documents can be reprsented as Objects" : Object oriented Document Programming.
+
+
+
+One spec was published ,As per that spec
+ "Document Object Model"
+    -How to represent document(elements/nodes) in object oriented way.->DOM
+
+ "Documents can be reprsented as Objects" : Object oriented Document Programming.
+............................................................................................
+
+How dom works?
+
+index.html           Broser runtime(C program)         Javascript Engine
+<h1>Hello</h1>       h1-Node                           h1- Object
+			Hello-Node			 Hello Object Property
+
+
+
+                 Every Html ELEMENT Inside Browser is "C Program"
+
+	
+ 		  Every Html ELEMENT javascript engine is "Object"
+
+
+javascript developer ---->uses api --->to communicate Object---->js engine---->browser engine.	*******************************************************************************************	
+
+Who and when "H1" object is created?
+
+if you want to create object?
+
+ class/ function
+
+function Employee(){}  let emp = new Employee()
+
+
+<h1> => function HTMLHeadingElement(){} => let h =new HTMLHeadingElement() ?
+
+
+
+if you want to create object?
+
+ class/ function
+
+function Employee(){}  let emp = new Employee()
+
+<h1> => function HTMLHeadingElement(){} => let h =new HTMLHeadingElement() ?
+
+Note: For html elements, we cant create object directly, rather than JS Engine will create objects , return references to the developer to access.
+ How via factory Objects: object helps to get other documents
+
+Factory Object : HTML Document =>body
+
+document.getElementById();
+   |
+Implicit object reference variable which points HTMLDocument OBject.
+
+.............................................................................................
+
+What is our objective here? DOM Programming?
+
+
+Enter into DOM programming:
+
+1.write dom programming using javascript language.
+
+<body>
+  |
+HTMLDocument : body : factory Object
+
+
+Document apis:
+
+Finding HTML Elements
+
+HTMLElement document.getElementById(id)	       Find an element by element id
+
+
+HTMLElement Document document.getElementsByTagName(name)	Find elements by tag name
+
+
+HTMLElement document.getElementsByClassName(name)	Find elements by class name
+
+
+HTMLElement document.querySelectory(selector)        find element/elements by selector
+
+
+
+
+Changing HTML Elements : update existing element
+......................
+element.innerHTML =  new html content	Change the inner HTML of an element
+element.attribute = new value	Change the attribute value of an HTML element
+element.style.property = new style	Change the style of an HTML element
+Method	Description
+element.setAttribute(attribute, value)	Change the attribute value of an HTML element
+
+Adding and Deleting Elements
+
+document.createElement(element)	Create an HTML element
+
+document.removeChild(element)	Remove an HTML element
+
+document.appendChild(element)	Add an HTML element
+
+document.replaceChild(new, old)	Replace an HTML element
+
+//document.write(text)	Write into the HTML output stream
+
+
+
+Create new Element:
+
+1.create element
+2.attach that element on existing tree. appendChild
+
+function findElement() {
+      //get the h1
+      const element = document.getElementById('heading');
+      console.dir(element);
+      //get the content
+      console.log(element.innerHTML);
+}
+findElement();
+
+function updateElement() {
+      const element = document.getElementById('heading');
+      //element.innerText = 'Welcome to React' : Plain String
+      element.innerHTML = 'Welcome to React!'; // which is node
+}
+updateElement()
+
+function createElement() {
+      const element = document.createElement('h2');
+      element.innerHTML = 'Hey Buddy Are you new to DOM!';
+      //attach that element
+      document.body.appendChild(element);
+}
+createElement();
+
+function applyStyle() {
+      const element = document.getElementById('heading');
+      //css property inside javascript
+      element.style.backgroundColor = 'yellow'
+
+}
+applyStyle()
+
+
+User interaction : Event Handling : UI events
+
+Hardware events : mouse,keyboard,touch events
+application events : onload,onupdate,offline,online........
+
+How to add user interaction?
+
+Every dom element has ability to subscribe events called dom events.
+
+ways to attach events?
+
+1.inline events
+2.through coding
+
+eventattachment has syntax
+
+on+EventName = "callbackfunction /handler function"
+
+Event Object : Object asscioated with every dom element.
+
+ Which is proxy object between dom element and handler function.
+
+if you want to access any dom element inside event handler, event object will help
+event object is created and ready for use inside handler function arg.
+
+
+ <h1 id="heading" onmouseout="applyMouseOut(event)" onmouseover="applyDynamicStyle(event)">Welcome to DOM</h1>
+
+function applyDynamicStyle(e) {
+      console.dir(e);
+      const element = e.target;
+      console.log(element);
+      element.style.backgroundColor = 'green'
+
+}
+
+function applyMouseOut(e) {
+      const element = e.target;
+      element.style.backgroundColor = 'yellow'
+}
+
+
+<h1 id="heading">Welcome to DOM</h1>
+
+function applyDynamicStyle(e) {
+      console.dir(e);
+      const element = e.target;
+      console.log(element);
+      element.style.backgroundColor = 'green'
+
+}
+function applyMouseOut(e) {
+      const element = e.target;
+      element.style.backgroundColor = 'yellow'
+}
+
+document.getElementById('heading').addEventListener('mouseover', applyDynamicStyle)
+
+document.getElementById('heading').addEventListener('mouseout', applyMouseOut);
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+javascript language can be used to manipulate web documents.
+
+When we use javascript language directly , we face lot of problems
+
+1.Complexity
+2.Performance
+3.No standard practice
+
+In 2001,DOM Wrappers - libs /frameworks came into picture.
+ DOJO
+2005, JQuery
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Architecture tech stack for dom programming
+
+
+Plain JS
+			 Application(dom) -plain js
+			     |
+			 Javascript Engine
+			      |
+			  Browser Engine
+
+
+
+
+Framework/lib
+			 Application(JQuery)
+			     |
+		       ---------------------------
+			  JQuery Engine	------javascript programming		
+                       -------------------------------
+			      |
+			 Javascript Engine
+			      |
+			  Browser Engine
+
+
+
+What is jquery engine?
+  Jquery engine is also javascript program.
+
+
+
+
+Angular
+			 Application(Angular)
+			     |
+		       ---------------------------
+			  Angular Engine : Renderer(Ng2) Renderer2(Ng4,5),Ivy(6,7)		
+                       -------------------------------
+			      |
+			 Javascript Engine
+			      |
+			  Browser Engine
+
+
+
+React
+
+
+		       Application(React)
+			     |
+		       ---------------------------
+	           React Engine :React fiber-->React 16 on wards		
+                       -------------------------------
+			      |
+			 Javascript Engine
+			      |
+			  Browser Engine
+
+
+
+React is created by face book.
+
+React was created not for others but created for face book one of the use case called "Buddylist" / chat application.
+
+
+instagram web version was fully built by react.
+
+React most implementations
+
+1.flipkart ui is written react.
+2.espn cric info
+3.facebook use case chat , graph....
+4.netflix
+etc......
+
+Where we can use React ? What type of application we can build using react.
+
+
+Data intensive application // Data driven app
+ where more data , which are chainging rapidly, where you want to update ui very faster with out ui flickering.
+
+
+React can be used to build application for 
+
+.........................................
+1.browsers : Desktop
+2.Mobile Apps : React Native
+.......................................................................................
+
+
+face book is working on many features projects related to react
+
+3.React VR : Virtual Reality.
+4.React Car : For car applications
+5.React TV  : React for TV.
+6.React IOT : any devices
+
+We are going to learn react web for browsers.
+
+
+React core modules:
+
+react.js      => Core module
+react-dom.js  => Browser
+
+-----------------------------------------------------------------------------
+ Markup layer             |  React Core Engine    | Render Engine   | Target
+-----------------------------------------------------------------------------
+
+HTML Markup---------------|  Object Tree(V.DOM)   |  ReactDom.render |  Browser
+
+Mobile Markup-------------|  Object Tree          |ReactNative.render| Mobile /Tabs
+
+VR Markup---------------  |  Object Tree          |VR.render         |VR devices
+
+IOT Markup--------------- |  Object Tree          | IOT.render       |IOT Devices   
+
+
+Object Tree :
+
+Note : in js every html element is object, in browser every element is node which forms tree
+
+
+<div>
+   <h1>
+       hello
+   </h1>
+       |
+       div
+          |
+          h1
+            hello
+
+         |
+         divObject
+		|
+		H1 Object
+			hello
+
+
+		|
+		React engine
+		   |
+		   
+////////////////////////////////////////////////////////////////////////////////////////////
+
+coding :
+
+Task: create dom element, dom elements(tree).........
+
+
+1.how to create dom objects using vannila js
+
+2.how to create dom objects using react.
+	
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+React uses declarative dom programing using a mini language invented by facebook : JSX
+
+JSX :
+ PL language built by face book to write user interfaces.
+ JSX is collection of html markup and javascript.
+ JSX is dsl and declarative.
+  Every device has its own jsx language syntax.
+  Brower jsx can't be used for building mobile application.
+
+
+Since jsx  is a language cant be executed on browser /mobile directly.
+
+
+
+JSX compilation model:
+
+                 layout.js / layout.jsx
+		       |
+		    compiler - babel.js 
+			|
+		    plain js code
+			|-----------------------Dev cycle
+	----------------------------------------- -- Excution cycles Starts
+Runtime : React Engine  compiled code feed into react engine
+			|
+		     Excute compiled js code : function calls
+			|
+	     create virtual Object tree (in browser V-dom)
+		        |
+		     Render Engine ; will conver react object tree into js dom object tree
+			|
+		   Flush the tree into target
+			|
+	--------------------------------------------
+        |
+     Browser
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+JSX is used to create dom elements.
+
+Every DOM element is object.
+
+Component : Component is Object , Coined by MS in 1989.
+
+According to ms, Component is object which has state(date),behaviour(methods) + User interface(Visual).
+ eg:Button,TextBox,Grid,Menu,MenuBar,Layout,Table.....
+
+Like Object tree(DOM Tree), In React we can create "Component" Tree.
+
+
+      Node===DOM Object====Component
+       h1     HTMLHeading   Heading
+..................................................................................
+
+In coding 
+
+Threre two libs 
+1.react.js  => to create component and manages all features related component.
+2.react-dom => Render engine.
+
+
+
+react.js
+
+1.React
+  It top level class which provides all apis to create,delete,update components.
+
+
+react-dom.js
+
+2.ReactDOM
+   It is top level class which provides api to flush the v.dom into real dom.
+
+
+
+
+//React : dom element creation : Object creation: Component creation
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+//create element/object/component : jsx language.
+
+const Heading = <h1>Hello React!</h1>;
+
+//flush the object /object tree/component/component tree into target: browser
+
+ReactDOM.render(Heading, document.getElementById('root'));
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Component Creational Patterns
+
+1.variable pattern
+2.function pattern
+3.es 6 class pattern
+
+
+
+
+//React : dom element creation : Object creation: Component creation
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+//component creational patterns
+
+//1.function : es 5 , es 6 arrow
+
+// function HeadingComponent() {
+//     //returns ReactElement:Object:Comonent
+//     //ReactElement is type of any Component in react
+//     return <h1>
+//         HelloReact!
+//     </h1>;
+// }
+//arrow :
+const HeadingComponent = () => <h1>
+    HelloReact!
+</h1>;
+
+
+//flush the object /object tree/component/component tree into target: browser
+//imperative function call : not recommended HeadingComponent()
+//ReactDOM.render(HeadingComponent(), document.getElementById('root'));
+
+//declarative function call with help of mark up
+//ReactDOM.render(<HeadingComponent></HeadingComponent>, document.getElementById('root'));
+ReactDOM.render(<HeadingComponent />, document.getElementById('root'));
+
+//React : dom element creation : Object creation: Component creation
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+//component creational patterns
+//es 6 class
+
+class HeadingComponent extends React.Component {
+
+    render() {
+        return <h1>Hello React!</h1>
+    }
+}
+
+
+ReactDOM.render(<HeadingComponent />, document.getElementById('root'));
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+JSX : javascript + XML:
+
+
+Since HTML parser is weak, but when y write react code, we need consistent code generation.
+
+So that react team, developed compiler follows basic xml rules.
+
+Basic XML  rules:
+
+1.every opened element must be closed
+  <h1>Hello</h1>
+  <Welcome></Welcome>
+ some elements may not have closing tag
+  <img /> : image element has no child elements : self closing. 
+
+2. In xml you must have one single root element.
+  all elements must be organized under single root element.
+
+ <h1>Welcome to React</h1>
+ <p>Path finder</p>
+
+In html what can be root element
+ <div>,<span>,all html 5 layout eleements header,footer,section,aside...
+
+//React : JSX Rules
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+const HeadingComponent = () =>
+    <div>
+        <h1>EverGent!</h1>
+        <p>Welcomes you!</p>
+    </div>
+
+
+ReactDOM.render(<HeadingComponent />, document.getElementById('root'));
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+How code gets compiled?
+
+source code:
+
+function Welcome() {
+      return <h1>Welcome To React!</h1>;
+}
+|
+babel
+|
+compiled code
+function Welcome() {
+  return React.createElement(
+    'h1',
+    null,
+    'Welcome To React!'
+  );
+}
+|
+runtime : react engine
+function Welcome() {
+  return React.createElement(
+    'h1',
+    null,
+    'Welcome To React!'
+  );
+}
+|
+//React.createElement
+function createElement(args){
+   document.createElement(args); // low level api call
+}
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+Object tree : Component Tree : Component composition:
+/////////////////////////////////////////////////////
+
+Use case :1 Layouts
+component 
+ app
+ header
+ footer
+ main
+
+
+//React : Component composition
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+
+//header component
+const HeaderComponent = () => <div>
+    <h1>Site Header</h1>
+</div>
+
+const BodyComponent = () => <div>
+    <p>We recommend using JSX to describe what your UI should look like.
+    Each JSX element is just syntactic sugar for calling React.createElement(). You will not typically
+    invoke the following methods directly if you are using JSX.
+    </p>
+</div>
+
+const FooterComponent = () => <div>
+    <h1>Site Footer</h1>
+</div>
+
+const Application = () => <div>
+    <HeaderComponent />
+    <BodyComponent />
+    <FooterComponent />
+</div>
+
+ReactDOM.render(<Application />, document.getElementById('root'));
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Modularity : breaking application into folders and files
+
+src
+ |
+ header
+ footer
+ body
+
+ index.js -entry point
+
+src
+ |
+ components
+ containers
+ util
+ reducers
+ actions
+ actioncreators
+ api
+
+ index.js -entry point
+
+
+components are saved with .jsx extension.
+but entry points and main application which is inside src folder should be .js only.
+barrel export file also .js only.
+
+
+*********************************************************************************************
+
+Data binding:
+
+ interploated using {data | expression}
+
+//Component : data binding
+import ReactDOM from 'react-dom';
+import React from 'react';
+
+
+
+function getValue() {
+    return 100;
+}
+
+
+//Data binding
+//data:primitive(string,number,boolean)
+//data : object,array
+const DisplayBoardComponent = () => {
+    //variables
+    let message = "Hai";
+    let magicNo = 9000;
+    let isEnabled = true;
+    //object binding
+    let product = {
+        id: 1,
+        name: 'Phone'
+    }
+    return <div>
+        <h1>Data Binding</h1>
+        <h2>String {"Hello"} {message}</h2>
+        <h2>Number {10} {magicNo}</h2>
+        <h2>Boolean {true ? "Enabled" : "Disabled"} {isEnabled ? "Enabled" : "Disabled"}</h2>
+        <h2>Object {product.id} {product.name}</h2>
+        <h2>Function {getValue()}</h2>
+
+    </div>
+};
+
+ReactDOM.render(<DisplayBoardComponent />, document.getElementById('root'));
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+functional programming;
+
+React core design based on functional programming.
+
+fp principles react uses
+
+1.pure function and immuablity.
+
+
+pure:
+
+1.pure function
+ 
+A.function which receives input, return the same =>function never modify the input
+
+ function  display(input){
+         return input
+  }
+ input===>input(as out put)
+
+ impure function;
+ function  display(input){
+         return input *11
+  }
+what if i want to change(mutate) the input? can i write the code in pure function ? Yes
+
+B.function which receives input, modifies the input, but dont modifity the original input
+  rather than, return new output==>immuablity.
+
+ function  display(input){
+         return input(immutable input)
+ }
+
+React uses both principle with respect to "Component data".
+
+How to bind data in react component?
+
+In two ways
+
+1.property pattern
+    -props pattern
+2.state pattern
+
+in react , components are created by calling functions
+
+//pure function
+//props=? is literal object
+function ProfileComponent(props){
+
+   return <h1>props.propertyName</h1>
+
+}
+render(ProfileComponent(data))
+render<ProfileComponent/>
+
+props are read only.
+
+props
+ basic props
+
+//Component : pure function: property
+import ReactDOM from 'react-dom';
+import React from 'react';
+
+//pure function
+//props = {} default value
+//props = {variable:value}
+// function ProfileComponent(props) {
+//     console.log(props)
+//     //props.firstName = 'foo'; pure function cant be modified
+//     return <div>
+//         <h1>Profile Information</h1>
+//         <h2>FirstName {props.firstName}</h2>
+//     </div>
+// }
+const ProfileComponent = props => <div>
+    <h1>Profile Information</h1>
+    <h2>FirstName {props.firstName}</h2>
+</div>
+
+
+//ReactDOM.render(ProfileComponent(input), document.getElementById('root'));
+ReactDOM.render(<ProfileComponent firstName="Subramanian" />, document.getElementById('root'));
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+props values:
+
+//Component : property values
+import ReactDOM from 'react-dom';
+import React from 'react';
+
+const ProfileComponent = props => <div>
+    <h1>Profile Information</h1>
+    <h2>FirstName {props.firstName}</h2>
+    <h2>Last Name {props.lastName}</h2>
+    <h2>City {props.city}</h2>
+    <h2>State {props.state}</h2>
+    <h2>Active {props.active ? 'Active' : 'Not Active'}</h2>
+    <h2>Likes {props.likes}</h2>
+    <h2>Contact {props.contact.email} {props.contact.phone}</h2>
+</div>
+
+
+//propertyName=value
+/**
+ * property value can be hardcoded
+ * property value can be an variable
+ */
+
+const lastName = 'Murugan';
+const city = "Coimbatore";
+const state = "Tamil nadu";
+const active = true;
+const likes = 1000;
+const contact = {
+    email: 'admin@foo.com',
+    phone: '9003706368'
+}
+
+ReactDOM.render(<ProfileComponent
+    firstName="Subramanian"
+    lastName={lastName}
+    city={city}
+    state={state}
+    active={active}
+    likes={likes}
+    contact={contact}
+/>,
+
+    document.getElementById('root'));
+
+
+code refactoring:
+//Component : property values
+import ReactDOM from 'react-dom';
+import React from 'react';
+
+
+
+//object destructuring
+// const ProfileComponent = props => {
+//     const { firstName, lastName, city, state, active, likes, contact: { email, phone } } = props;
+//     return <div>
+//         <h1>Profile Information</h1>
+//         <h2>FirstName {firstName}</h2>
+//         <h2>Last Name .lastName}</h2>
+//         <h2>City {city}</h2>
+//         <h2>State {state}</h2>
+//         <h2>Active {active ? 'Active' : 'Not Active'}</h2>
+//         <h2>Likes {likes}</h2>
+//         <h2>Contact {email} {phone}</h2>
+//     </div>
+// }
+const ProfileComponent = ({ firstName, lastName, city, state, active, likes, contact: { email, phone } }) => <div>
+    <h1>Profile Information</h1>
+    <h2>FirstName {firstName}</h2>
+    <h2>Last Name .lastName}</h2>
+    <h2>City {city}</h2>
+    <h2>State {state}</h2>
+    <h2>Active {active ? 'Active' : 'Not Active'}</h2>
+    <h2>Likes {likes}</h2>
+    <h2>Contact {email} {phone}</h2>
+</div>
+
+
+const lastName = 'Murugan';
+const city = "Coimbatore";
+const state = "Tamil nadu";
+const active = true;
+const likes = 1000;
+const contact = {
+    email: 'admin@foo.com',
+    phone: '9003706368'
+}
+
+ReactDOM.render(<ProfileComponent
+    firstName="Subramanian"
+    lastName={lastName}
+    city={city}
+    state={state}
+    active={active}
+    likes={likes}
+    contact={contact}
+/>,
+
+    document.getElementById('root'));
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+class and props
+
+props are not passed as a parameter like functions.
+
+in classes props is variable which is derived React.Component
+
+Component class:
+...............
+Component is super class of a component which has
+
+1.instance variables
+props
+state
+2.instance methods
+3.static variables
+
+
+//Component : props and classes
+import ReactDOM from 'react-dom';
+import React from 'react';
+
+
+
+// class ProfileComponent extends React.Component {
+//     render() {
+//         console.log(this.props) //by default value is empty object = 
+//         return <div>
+//             <h1>Profile Information</h1>
+//             <h2>FirstName {this.props.firstName}</h2>
+//             <h2>Last Name {this.props.lastName}</h2>
+//             <h2>City {this.props.city}</h2>
+//             <h2>State {this.props.state}</h2>
+//             <h2>Active {this.props.active ? 'Active' : 'Not Active'}</h2>
+//             <h2>Likes {this.props.likes}</h2>
+//             <h2>Contact {this.props.contact.email} {this.props.contact.phone}</h2>
+//         </div>
+//     }
+// }
+class ProfileComponent extends React.Component {
+    render() {
+        const { firstName, lastName, city, state, active, likes, contact: { email, phone } } = this.props;
+        return <div>
+            <h1>Profile Information</h1>
+            <h2>FirstName {firstName}</h2>
+            <h2>Last Name {lastName}</h2>
+            <h2>City {city}</h2>
+            <h2>State {state}</h2>
+            <h2>Active {active ? 'Active' : 'Not Active'}</h2>
+            <h2>Likes {likes}</h2>
+            <h2>Contact {email} {phone}</h2>
+        </div>
+    }
+}
+
+const lastName = 'Murugan';
+const city = "Coimbatore";
+const state = "Tamil nadu";
+const active = true;
+const likes = 1000;
+const contact = {
+    email: 'admin@foo.com',
+    phone: '9003706368'
+}
+
+ReactDOM.render(<ProfileComponent
+    firstName="Subramanian"
+    lastName={lastName}
+    city={city}
+    state={state}
+    active={active}
+    likes={likes}
+    contact={contact}
+/>,
+
+    document.getElementById('root'));
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//default Args
+function add(a=1,b=1){
+  return a+b
+}
+add(1,2)
+add()==
+
+
+//Component : props  with default props
+import ReactDOM from 'react-dom';
+import React from 'react';
+
+// class ProfileComponent extends React.Component {
+//     //defaultProps : inside class
+//     static defaultProps = {
+//         firstName: 'defaultName'
+//     }
+
+//     render() {
+//         const { firstName, lastName, city, state, active, likes, contact: { email, phone } } = this.props;
+//         return <div>
+//             <h1>Profile Information</h1>
+//             <h2>FirstName {firstName}</h2>
+//             <h2>Last Name {lastName}</h2>
+//             <h2>City {city}</h2>
+//             <h2>State {state}</h2>
+//             <h2>Active {active ? 'Active' : 'Not Active'}</h2>
+//             <h2>Likes {likes}</h2>
+//             <h2>Contact {email} {phone}</h2>
+//         </div>
+//     }
+// }
+//default Props : outside class
+// ProfileComponent.defaultProps = {
+//     firstName: 'defaultName'
+// }
+
+//default Props with functions
+
+const ProfileComponent = ({ firstName, lastName, city, state, active, likes, contact: { email, phone } }) => <div>
+    <h1>Profile Information</h1>
+    <h2>FirstName {firstName}</h2>
+    <h2>Last Name .lastName}</h2>
+    <h2>City {city}</h2>
+    <h2>State {state}</h2>
+    <h2>Active {active ? 'Active' : 'Not Active'}</h2>
+    <h2>Likes {likes}</h2>
+    <h2>Contact {email} {phone}</h2>
+</div>;
+
+//default Props
+ProfileComponent.defaultProps = {
+    firstName: 'defaultName'
+}
+
+
+const lastName = 'Murugan';
+const city = "Coimbatore";
+const state = "Tamil nadu";
+const active = true;
+const likes = 1000;
+const contact = {
+    email: 'admin@foo.com',
+    phone: '9003706368'
+}
+
+ReactDOM.render(<ProfileComponent
+    lastName={lastName}
+    city={city}
+    state={state}
+    active={active}
+    likes={likes}
+    contact={contact}
+/>,
+
+    document.getElementById('root'));
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+property constraints:
+
+
+what if i want to enforce type rules and validations on property
+
+eg:
+
+ i have property called likes, which is expected to be number, what if i pass string, 
+we need to test it.
+
+property constraints will throw warning during dev cycles, if you see warning you have to fix it.
+
+how to apply property type and validation:
+
+ReactComponent has static property "propTypes"
+
+Component.propTypes = { 
+ 
+  id:rule
+
+}
+how to tell rules?
+ rules are mentioned in a separate module
+
+
+//Component : typechecking with Props
+import ReactDOM from 'react-dom';
+import React from 'react';
+import PropTypes from 'prop-types';
+
+
+const ProfileComponent = ({ firstName, lastName, city, state, active, likes, contact: { email, phone } }) => <div>
+    <h1>Profile Information</h1>
+    <h2>FirstName {firstName}</h2>
+    <h2>Last Name {lastName}</h2>
+    <h2>City {city}</h2>
+    <h2>State {state}</h2>
+    <h2>Active {active ? 'Active' : 'Not Active'}</h2>
+    <h2>Likes {likes}</h2>
+    <h2>Contact {email} {phone}</h2>
+</div>;
+//define property rules
+ProfileComponent.propTypes = {
+    firstName: PropTypes.string.isRequired,
+    likes: PropTypes.number
+}
+//default Props
+ProfileComponent.defaultProps = {
+    firstName: 'defaultName'
+}
+
+const firstName = "Subramanian"
+const lastName = 'Murugan';
+const city = "Coimbatore";
+const state = "Tamil nadu";
+const active = true;
+const likes = 100;
+const contact = {
+    email: 'admin@foo.com',
+    phone: '9003706368'
+}
+
+ReactDOM.render(<ProfileComponent
+    firstName={firstName}
+    lastName={lastName}
+    city={city}
+    state={state}
+    active={active}
+    likes={likes}
+    contact={contact}
+/>,
+
+    document.getElementById('root'));
+
+
+//Component : typechecking with Props
+import ReactDOM from 'react-dom';
+import React from 'react';
+import PropTypes from 'prop-types';
+
+
+const ProfileComponent = ({ firstName, lastName, city, state, active, likes, contact: { email, phone } }) => <div>
+    <h1>Profile Information</h1>
+    <h2>FirstName {firstName}</h2>
+    <h2>Last Name {lastName}</h2>
+    <h2>City {city}</h2>
+    <h2>State {state}</h2>
+    <h2>Active {active ? 'Active' : 'Not Active'}</h2>
+    <h2>Likes {likes}</h2>
+    <h2>Contact {email} {phone}</h2>
+</div>;
+//define property rules
+ProfileComponent.propTypes = {
+    firstName: PropTypes.string.isRequired,
+    likes: PropTypes.number
+}
+//default Props
+ProfileComponent.defaultProps = {
+    firstName: 'defaultName'
+}
+
+const firstName = "Subramanian"
+const lastName = 'Murugan';
+const city = "Coimbatore";
+const state = "Tamil nadu";
+const active = true;
+const likes = 100;
+const contact = {
+    email: 'admin@foo.com',
+    phone: '9003706368'
+}
+
+ReactDOM.render(<ProfileComponent
+    firstName={firstName}
+    lastName={lastName}
+    city={city}
+    state={state}
+    active={active}
+    likes={likes}
+    contact={contact}
+/>,
+
+    document.getElementById('root'));
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Arrays and React:
+
+arrays api:
+ iterator
+  for... --
+  for...each -- mutable apis
+  map - pure function : returns new array
+  filter
+  reduce
+ ..........
+
+based on array we can build lot of layouts
+
+1.listview -ul .. li
+2.cardview - div,header,footer...
+3.gridview -table tr
+
+
+//Arrays
+import ReactDOM from 'react-dom';
+import React from 'react';
+import TODOS from './mock-data/todos-mock';
+
+const ToDoListComponent = props => {
+    const { todos } = props;
+    return <div>
+        <div>
+            {
+              todos.map(todo => <div>
+                    <h3>{todo.title} : {todo.completed ? 'Completed' : 'Not Completed'} </h3>
+                </div>)
+            }
+        </div>
+    </div>
+}
+ReactDOM.render(<ToDoListComponent todos={TODOS} />, document.getElementById('root'));
+
+Styling React Components:
+
+How to add css?
+
+two ways:
+
+using class attribute : external style.
+using style attribute : inline
+
+html syntax:
+<div class="container">
+
+</div>
+
+React uses jsx syntax
+
+Rule for html attributes
+
+3. html attributes must be in in camel case
+
+HTML ATTRIBUTES
+
+accept acceptCharset accessKey action allowFullScreen alt async autoComplete
+autoFocus autoPlay capture cellPadding cellSpacing challenge charSet checked
+cite classID className colSpan cols content contentEditable contextMenu controls
+controlsList coords crossOrigin data dateTime default defer dir disabled
+download draggable encType form formAction formEncType formMethod formNoValidate
+formTarget frameBorder headers height hidden high href hrefLang htmlFor
+httpEquiv icon id inputMode integrity is keyParams keyType kind label lang list
+loop low manifest marginHeight marginWidth max maxLength media mediaGroup method
+min minLength multiple muted name noValidate nonce open optimum pattern
+placeholder poster preload profile radioGroup readOnly rel required reversed
+role rowSpan rows sandbox scope scoped scrolling seamless selected shape size
+sizes span spellCheck src srcDoc srcLang srcSet start step style summary
+tabIndex target title type useMap value width wmode wrap
+
+how to link css in react?
+
+import css files inside index.js
+
+can we import css?
+yes, this is the concept of webpack.
+
+you can import any thing - css,image,documents(static assets)
+
+import './App.css';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+
+//Arrays
+import ReactDOM from 'react-dom';
+import React from 'react';
+import TODOS from './mock-data/todos-mock';
+// import './index.css'
+// import './App.css';
+import 'bootstrap/dist/css/bootstrap.css'
+
+//style object :javascript style object pattern
+const todoStyle = {
+    fontStyle: 'italic',
+    color: 'blue'
+}
+
+const ToDoListComponent = props => {
+    const { todos } = props;
+    return <div className="container">
+        <div>
+            <h1>Todo Application</h1>
+            {
+                todos.map((todo, index) => <div key={index}>
+                    <h3 style={todoStyle}>{todo.title} : {todo.completed ? 'Completed' : 'Not Completed'} </h3>
+                </div>)
+            }
+        </div>
+    </div>
+}
+ReactDOM.render(<ToDoListComponent todos={TODOS} />, document.getElementById('root'));
+
+
+
+
+
+
+
+
+
+
+
