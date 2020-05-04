@@ -1459,11 +1459,428 @@ const ToDoListComponent = props => {
 }
 ReactDOM.render(<ToDoListComponent todos={TODOS} />, document.getElementById('root'));
 
+********************************************************************************************
+
+Component compostion and Uni directional data flow:
+...................................................
+
+Flux : 
+ It is design pattern, pass data from one component to component uni directional way.
+
+
+Component Communication;
+  how components are going to communicate each other.
+  during communication you can pass data.
+
+1.parent to child
+   via properties.    
+2.child to parent
+   
+3.siblings : across
+
+How to break the component , why?
+
+Component responsiability:
+
+Component receives data from outside(api,other data sources),the same component is used
+to display data. => We should not do this.
+ Break component defines roles
+
+1.Container Component
+    container component is component which receives data from data sources.
+2.Presentational component
+    Presentational component is component which receives data from the parent component
+ and display the data.
+  
+
+
+
+Profile => receive properties and display there itself.
+ Profile component must receive property then it has to forword properties to another component to display.
+
+  Profile- props--------------getData
+    |
+   forward props to child component
+      |
+      ProfileDisplay.
+     	|
+        Address
+	 |
+	 ....
+
+
+import ReactDOM from 'react-dom';
+import React from 'react';
+import PropTypes from 'prop-types';
+import 'bootstrap/dist/css/bootstrap.css'
+
+//break the component
+const ProfileContainerComponent = props => {
+    return <ProfileDisplayComponent
+        firstName={props.firstName}
+        lastName={props.lastName}
+        city={props.city}
+        state={props.state}
+        active={props.active}
+        likes={props.likes}
+        contact={props.contact}
+    />
+}
+//the presentational component
+const ProfileDisplayComponent = props => {
+    const { firstName, lastName, city, state, active, likes, contact: { email, phone } } = props; return <div>
+        <h1>Profile Information</h1>
+        <h2>FirstName {firstName}</h2>
+        <h2>Last Name {lastName}</h2>
+        <h2>Active {active ? 'Active' : 'Not Active'}</h2>
+        <h2>Likes {likes}</h2>
+        <AddressComponent city={city} state={state} email={email} phone={phone} />
+    </div>
+}
+//sub presentational compoent
+const AddressComponent = props => {
+    const { city, state, email, phone } = props;
+    return <div>
+        <addr>
+            <p>city {city}</p>
+            <p>state {state}</p>
+            <p>Phone {phone}</p>
+            <p>email {email}</p>
+        </addr>
+    </div>
+}
+
+
+//data source
+const firstName = "Subramanian"
+const lastName = 'Murugan';
+const city = "Coimbatore";
+const state = "Tamil nadu";
+const active = true;
+const likes = 100;
+const contact = {
+    email: 'admin@foo.com',
+    phone: '9003706368'
+}
+
+const Application = () =>
+    <div className="container">
+        <ProfileContainerComponent
+            firstName={firstName}
+            lastName={lastName}
+            city={city}
+            state={state}
+            active={active}
+            likes={likes}
+            contact={contact}
+        />
+    </div>
+
+ReactDOM.render(<Application />, document.getElementById('root'));
+
+
+import React, { Component, Fragment } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+export class Profile extends Component {
+      render() {
+            return <div className="container">
+                  <ProfileDisplay title={this.props.title} name={this.props.name} rating={this.props.rating} status={this.props.status} address={this.props.address} />
+            </div>
+      }
+}
+
+
+Spread Operator which simplifies property passing from parent to child
+
+  ... : Spread Operator (ES 7 feature) : merge operator
+  ... : Rest operator : (ES 6 feature) : passing args 
+
+
+Syntax:
+
+Old Style:
+<ProfileDisplay title={this.props.title} name={this.props.name} rating={this.props.rating} status={this.props.status} address={this.props.address} />
+
+With Spread Notation
+<ProfileDisplay {...this.props} />
+
+
+//how to pass data from the parent compoent to child component in simple way
+// how to throw the entire property to child compoents
+
+import ReactDOM from 'react-dom';
+import React from 'react';
+import PropTypes from 'prop-types';
+import 'bootstrap/dist/css/bootstrap.css'
+import PROFILES from './mock-data/profile-mock';
+
+//break the component
+const ProfileContainerComponent = props => {
+    return <ProfileDisplayComponent {...props} title="Profile Information" />
+}
+//the presentational component
+const ProfileDisplayComponent = props => {
+    const { id, title, firstName, lastName, active, likes } = props;
+    return <div>
+        <h1>{title}</h1>
+        <h2>Id {id}</h2>
+        <h2>FirstName {firstName}</h2>
+        <h2>Last Name {lastName}</h2>
+        <h2>Active {active ? 'Active' : 'Not Active'}</h2>
+        <h2>Likes {likes}</h2>
+        <AddressComponent {...props} />
+    </div>
+}
+//sub presentational compoent
+const AddressComponent = props => {
+    const { city, state, contact: { phone, email } } = props;
+    return <div>
+        <address>
+            <p>city {city}</p>
+            <p>state {state}</p>
+            <p>Phone {phone}</p>
+            <p>email {email}</p>
+        </address>
+    </div>
+}
+
+
+//data source
+
+
+
+const Application = () =>
+    <div className="container">
+
+        {
+            PROFILES.map((profile, index) => {
+                // const { id, firstName, lastName, city, state, active, likes } = profile;
+                // return <ProfileContainerComponent
+                //     id={id}
+                //     firstName={firstName}
+                //     lastName={lastName}
+                //     city={city}
+                //     state={state}
+                //     active={active}
+                //     likes={likes}
+                //     contact={profile.contact}
+                // />
+                return <ProfileContainerComponent key={index} {...profile} />
+            })
+        }
+
+
+
+    </div>
+
+ReactDOM.render(<Application />, document.getElementById('root'));
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+state :
+
+state is another way of representing data inside component.
+
+Points:
+
+1.with respect to props, component never modifies data / component never mutates the data.
+  -Based on fp principle called "pure function".
+
+2.what if i want to change data /mutate data?
+ props never help us, then we need to new pattern , that is called state.
+
+state helps to modifiy data/ mutate data.
+ 
+Pure function:
+..............
+
+B.function which receives input, modifies the input, but dont modifity the original input
+  rather than, return new output==>immuablity.
+
+ function  display(input){
+         return input(immutable input)
+ }
+
+how to implement?
+
+1.inside class component we have to write code.
+
+What is the value of props?
+  it is literal object
+props = {
+  title:....
+}
+value is already initialzed
+
+What is the value of state?
+
+the value of state also must be literal object
+The developer must initalize.
+
+
+How to change state?
+
+Ways :
+
+1.inital render : when page is loaded first
+2.through user/program interaction : event handling
+
+Event Handling:
+
+Button==>event====>Listener(callback)
+
+4.1.How to bind event
+ <button onclick="listner">text</button> -js
+
+React event binding:you are writing jsx : jsx event binding.
+jsx and attribute binding: camelCase
+event handler is function/method of class.
+
+
+ <button className="btn btn-success" onClick={this.increment} >+</button> -external event listner
+ <button className="btn btn-success" onClick={()=>{}} >+</button> -inline event listener
+
+
+write biz logic to mutate the state variable called counter?
+
+
+
+render cycle and virtual dom;
+.............................
+
+Click-----onIncrement-----render---????no update in the screen.
+
+what is render method ?how it is working ?
+
+render method is method which is called by react engine internally. we should not call manually.
+
+render method returns "Object" ==>ReactElement===>Virtual Object=>Real dom representation inside react engine.
+
+render method returns Object==> dom element with "data-state".
+
+every dom programing we change data eg
+  <h1>data</h1> --if you triger any event, js will change data .
+ how change works?
+  -by removing old value and add new value
+    
+ <h1>data-1</h1> -> <h1>data-2</h1>
+
+instead of changing the dom mutations(changes) in the orginal dom, react changes in the 
+virtual layer, render engine will decide when to update/flush the modified data to underneeth
+dom.
+
+
+how decision is made to flush the modified data?
+
+ React uses algorthim ; diff algorthim
+
+User click---biz logic----->render----returns virtual object(vdom)|---->react takes the snap
+shoot of already render dom as object--apply diff algorthim---flushes only modified data to underneeth dom.
+
+how to invoke render cycle?
+
+1.by calling setState method
+
+2.when you pass new props to child components
+
+setState is pure function which modifies data
+newObject means immutable object.
+
+setState(function(){return newObject});
 
 
 
 
+1.To return immutable state, pure function pattern
 
+setState(func(oldstate){
+   return newState
+}) =>new State
+
+State Transition:
+
+Level-1--->Level-2--->Level-3--->Level-4--->Level-5--->LevelN...
+ {count:0}---> {count:1}---> {count:2}----->{count:3}--->{count:4}-----> {count:N }
+
+how to return newState?
+
+1. returning new Object with modified data, copy old fields as it is
+
+ let count = prevState.count + 1
+ return {
+    
+    count : count
+
+ }
+
+
+
+
+import ReactDOM from 'react-dom';
+import React from 'react';
+import PropTypes from 'prop-types';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+class CounterComponent extends React.Component {
+
+    state = {
+        counter: 0 // inital value
+    };
+
+    //Listener method
+    onIncrement = () => {
+        // alert('increment is called')
+        //biz logic: increment counter
+        // this.state.counter = this.state.counter + 1;
+        //console.log(this.state.counter)
+        //call render in each button click
+        // this.render(); : dont call render manually
+        //call setState method
+        // this.setState(function (oldstate) {
+        //     console.log(oldstate);
+        //     //return new object :state object
+        //     return {
+        //         counter: oldstate.counter + 1
+        //     }
+        // });
+        // this.setState(oldstate => {
+        //     return {
+        //         counter: oldstate.counter + 1
+        //     }
+        // });
+        // this.setState(oldstate => {
+        //     let counter = oldstate.counter + 1;
+        //     return {
+        //         counter: counter
+        //     }
+        // }); 
+        // this.setState(oldstate => {
+        //     let counter = oldstate.counter + 1;
+        //     return {
+        //         counter
+        //     }
+        // });
+
+        let counter = this.state.counter + 1;
+        this.setState({ counter });
+    }
+
+    render() {
+        console.log('render method is called', this.state.counter);
+        return <div className="container">
+            <h1>Counter Application</h1>
+            <h3>Counter : {this.state.counter}</h3>
+            <button className="btn btn-success" onClick={this.onIncrement}>+</button>
+        </div>
+    }
+}
+const Application = () => <CounterComponent />
+
+ReactDOM.render(<Application />, document.getElementById('root'));
 
 
 
