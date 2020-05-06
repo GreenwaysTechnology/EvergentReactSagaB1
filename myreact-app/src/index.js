@@ -1,63 +1,55 @@
-
-import ReactDOM from 'react-dom';
-import React from 'react';
-import PropTypes from 'prop-types';
-import 'bootstrap/dist/css/bootstrap.css'
+import React, { Component, Fragment } from 'react';
+import { render } from 'react-dom';
 
 
-class CounterComponent extends React.Component {
+const GreetingComponent = () => {
 
-    state = {
-        counter: 0 // inital value
-    };
+    // return <React.Fragment>
+    //     <h1>Welcome</h1>
+    //     <h1>How are You</h1>
+    // </React.Fragment>
+    // return <Fragment>
+    //     <h1>Welcome</h1>
+    //     <h1>How are You</h1>
+    // </Fragment>
+    return <>
+        <h1>Welcome</h1>
+        <h1>How are You</h1>
+        <Table />
+    </>
+}
 
-    //Listener method
-    onIncrement = () => {
-        // alert('increment is called')
-        //biz logic: increment counter
-        // this.state.counter = this.state.counter + 1;
-        //console.log(this.state.counter)
-        //call render in each button click
-        // this.render(); : dont call render manually
-        //call setState method
-        // this.setState(function (oldstate) {
-        //     console.log(oldstate);
-        //     //return new object :state object
-        //     return {
-        //         counter: oldstate.counter + 1
-        //     }
-        // });
-        // this.setState(oldstate => {
-        //     return {
-        //         counter: oldstate.counter + 1
-        //     }
-        // });
-        // this.setState(oldstate => {
-        //     let counter = oldstate.counter + 1;
-        //     return {
-        //         counter: counter
-        //     }
-        // }); 
-        // this.setState(oldstate => {
-        //     let counter = oldstate.counter + 1;
-        //     return {
-        //         counter
-        //     }
-        // });
 
-        let counter = this.state.counter + 1;
-        this.setState({ counter });
-    }
-
+class Table extends Component {
     render() {
-        console.log('render method is called', this.state.counter);
-        return <div className="container">
-            <h1>Counter Application</h1>
-            <h3>Counter : {this.state.counter}</h3>
-            <button className="btn btn-success" onClick={this.onIncrement}>+</button>
+        return (
+            <table>
+                <tr>
+                    <Columns />
+                </tr>
+            </table>
+        );
+    }
+}
+class Columns extends Component {
+    render() {
+        return (
+            <>
+                <td>Hello</td>
+                <td>World</td>
+            </>
+        );
+    }
+}
+
+class WelcomeComponent extends Component {
+    render() {
+        return <div>
+            <GreetingComponent />
         </div>
     }
 }
-const Application = () => <CounterComponent />
 
-ReactDOM.render(<Application />, document.getElementById('root'));
+const App = () => <WelcomeComponent />;
+
+render(<App />, document.getElementById('root'));

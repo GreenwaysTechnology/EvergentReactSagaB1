@@ -1883,6 +1883,915 @@ const Application = () => <CounterComponent />
 ReactDOM.render(<Application />, document.getElementById('root'));
 
 
+Event Handlers:
+...............
+1.with event listeners
+ <button className="btn btn-success" onClick={this.onIncrement}>+</button>
+
+
+2.with in line event handlers
+ <button className="btn btn-success" onClick={
+                () => {
+                    let counter = this.state.counter - 1;
+                    this.setState({ counter });
+                }
+            }>-</button>
+
+/////////////////////////////////////////////////////////////////////////////////////////
+how to add more state variable?
+
+
+
+
+    import ReactDOM from 'react-dom';
+    import React from 'react';
+    import PropTypes from 'prop-types';
+    import 'bootstrap/dist/css/bootstrap.css'
+
+
+    class ReviewComponent extends React.Component {
+
+        state = {
+            like: 0,
+            dislike: 0
+        };
+
+        //Listener method
+        onLike = () => {
+            this.setState(function (prvState) {
+                console.log('previous state ', prvState)
+                //immutabilty logic: we never modifify state directly
+                let like = prvState.like + 1
+                let dislike = prvState.dislike;
+                return {
+                    like,
+                    dislike
+                }
+            });
+        }
+        onDislike = () => {
+            this.setState(function (prvState) {
+                console.log('previous state ', prvState)
+                //immutabilty logic: we never modifify state directly
+                let like = prvState.like
+                let dislike = prvState.dislike + 1;
+                return {
+                    like,
+                    dislike
+                }
+            });
+        }
+
+
+        render() {
+            console.log('Current State', this.state);
+            return <div className="container">
+                <h1>Review Application</h1>
+                <h3>Like : {this.state.like} </h3>
+                <h3>DisLike : {this.state.dislike} </h3>
+
+                <button className="btn btn-success" onClick={this.onLike}>Like</button>
+                <button className="btn btn-success" onClick={this.onDislike}>DisLike</button>
+
+            </div>
+        }
+    }
+    const Application = () => <ReviewComponent />
+
+    ReactDOM.render(<Application />, document.getElementById('root'));
+
+////////////////////////////////////////////////////////////////////////////////////////////
+How to implement immutablity?
+
+immuablity can be applied on literal object and arrays.
+
+Pure function 2nd principle:
+...........................
+
+javascript has api, will never modify object directly, rather it will take copy ,modifies and return the same.
+
+ways of wirting immutablity:
+
+1.plain javascript:
+
+function updateProfile(city, profile) {
+    console.log('Previous Profile', profile);
+    //way 1; return plain new object
+    //create new object, by copying old object properties,
+    //while copying , change the property which you want to update
+    return {
+        id: profile.id, // no change
+        name: profile.name,
+        city: city
+    }
+
+}
+
+drawbacks of this approach:
+
+1.you have to manually copy all the properties.
+2.if you want update more properties also complex.
+
+Solution:
+1.Object.assign:
+
+function updateProfile(city, profile) {
+    console.log('Previous Profile', profile);
+    //way 2; Object.assign api
+    // return Object.assign({}, profile, { city: city })
+    return Object.assign({}, profile, { city })
+
+}
+
+even we can simplify this code using es7 spread operator(...)
+
+//immutablity testing
+
+
+//whether this function is pure or not
+//pure function means never modifes data,if want , then you have to return immutable
+//data structure. : dont mutate original object.
+
+//this function not pure function , because it modifies same memory address
+// function updateProfile(city, profile) {
+//     console.log('Previous Profile', profile);
+//     //update logic : mutable or immutable ? 
+//     profile.city = city;
+//     //return profile after update
+//     return profile;
+// }
+
+//pure function :
+/**
+ * 
+ * 
+ *  
+ */
+//plain pattern
+// function updateProfile(city, profile) {
+//     console.log('Previous Profile', profile);
+//     //way 1; return plain new object
+//     //create new object, by copying old object properties,
+//     //while copying , change the property which you want to update
+//     return {
+//         id: profile.id, // no change
+//         name: profile.name,
+//         city: city
+//     }
+
+// }
+
+// function updateProfile(city, profile) {
+//     console.log('Previous Profile', profile);
+//     //way 2; Object.assign api
+//     // return Object.assign({}, profile, { city: city })
+//     return Object.assign({}, profile, { city })
+
+// }
+//using spread operator
+function updateProfile(city, profile) {
+    console.log('Previous Profile', profile);
+    //way 3; spread operator (...)
+    // return { ...profile, city: city }
+    return { ...profile, city }
+
+}
+//send profile object for modification
+let profile = {
+    id: 1,
+    name: 'Subramanian',
+    city: 'Chennai'
+}
+
+//req, i want to update profile city 
+
+//how to test pure function?
+//we have javascript api
+Object.freeze(profile);
+let updatedProfile = updateProfile('Coimbatore', profile);
+console.log('Current Profile ', updatedProfile);
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+import ReactDOM from 'react-dom';
+import React from 'react';
+import PropTypes from 'prop-types';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+class ReviewComponent extends React.Component {
+
+    state = {
+        like: 0,
+        dislike: 0
+    };
+
+    //Listener method
+    onLike = () => {
+        this.setState(prvState => {
+            console.log('previous state ', prvState)
+            //immutabilty logic: we never modifify state directly
+            let like = prvState.like + 1
+            //  let dislike = prvState.dislike;
+            //way 1: plain js
+            // return {
+            //     like,
+            //     dislike
+            // }
+            //way 2: using Object.assign
+            // return Object.assign({}, prvState, { like })
+            //way 3 Using spread notation
+            return {
+                ...prvState, like
+            }
+        });
+    }
+    onDislike = () => {
+        this.setState(prvState => {
+            console.log('previous state ', prvState)
+            //immutabilty logic: we never modifify state directly
+            let dislike = prvState.dislike + 1;
+            //way 1: plain js
+            // return {
+            // return {
+            //     like,
+            //     dislike
+            // }
+            //return Object.assign({}, prvState, { dislike })
+            return {
+                ...prvState, dislike
+            }
+
+        });
+    }
+
+
+    render() {
+        console.log('Current State', this.state);
+        return <div className="container">
+            <h1>Review Application</h1>
+            <h3>Like : {this.state.like} </h3>
+            <h3>DisLike : {this.state.dislike} </h3>
+
+            <button className="btn btn-success" onClick={this.onLike}>Like</button>
+            <button className="btn btn-success" onClick={this.onDislike}>DisLike</button>
+
+        </div>
+    }
+}
+const Application = () => <ReviewComponent />
+
+ReactDOM.render(<Application />, document.getElementById('root'));
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Arrays and immutablity:
+
+
+
+//array immutablity
+
+
+//add new elements
+// function addItem(item, list) {
+//     console.log('Before add', list);
+//     return list.push(item);
+// }
+
+//immuability ;
+// function addItem(item, list) {
+//     console.log('Before add', list);
+//     return list.concat(item);
+// }
+function addItem(item, list) {
+    console.log('Before add', list);
+    return [...list, item];
+}
+
+let list = [1, 2, 3];
+//add new item : push : is pure or not
+Object.freeze(list);
+let result = addItem(4, list);
+//console.log('After add', list);
+
+console.log(result);
+
+// if update,delete,filter:
+
+//array immutable apis
+/**
+ * 1.map => new array after transformation
+ * 2.filter =>new array : update and delete,search or find new element.
+ * 
+ */
+function searchByCity(city, profiles) {
+    return profiles.filter(profile => profile.city === city);
+}
+
+let profiles = [
+    {
+        id: 1,
+        city: 'coimbatore'
+    },
+    {
+        id: 2,
+        city: 'coimbatore'
+    },
+    {
+        id: 3,
+        city: 'chennai'
+    },
+    {
+        id: 4,
+        city: 'delhi'
+    },
+    {
+        id: 5,
+        city: 'pune'
+    }
+]
+const filteredProfiles = searchByCity('pune', profiles);
+console.log(filteredProfiles);
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+Dynamic props , function as prop:
+.......................................
+
+State of an component can be passed as prop to another component (child components)
+The listener of component can be passed as prop to another component(child components)
+
+
+//state as prop
+
+import ReactDOM from 'react-dom';
+import React from 'react';
+import 'bootstrap/dist/css/bootstrap.css'
+
+//container component
+class ReviewComponent extends React.Component {
+
+    state = {
+        like: 0,
+        dislike: 0
+    };
+
+    //Listener method
+    onLike = () => {
+        this.setState(prvState => {
+            console.log('previous state ', prvState)
+            //immutabilty logic: we never modifify state directly
+            let like = prvState.like + 1
+            return {
+                ...prvState, like
+            }
+        });
+    }
+    onDislike = () => {
+        this.setState(prvState => {
+            console.log('previous state ', prvState)
+            //immutabilty logic: we never modifify state directly
+            let dislike = prvState.dislike + 1;
+
+            return {
+                ...prvState, dislike
+            }
+
+        });
+    }
+
+
+    render() {
+        return <div className="container">
+            {/**state as prop: dynamic props */}
+            <ReviewDisplay {...this.state} onLike={this.onLike} onDislike={this.onDislike} />
+        </div>
+    }
+}
+
+//presentational component : prop dynamically
+const ReviewDisplay = props => {
+    return <div>
+        <h1>Review Application</h1>
+        <h3>Like : {props.like} </h3>
+        <h3>DisLike : {props.dislike} </h3>
+        <button className="btn btn-success" onClick={props.onLike}>Like</button>
+        <button className="btn btn-success" onClick={props.onDislike}>DisLike</button>
+    </div>
+}
+
+const Application = () => <ReviewComponent />
+
+ReactDOM.render(<Application />, document.getElementById('root'));
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+What can be a prop to a component:
+
+data as prop
+state as prop
+function as prop
+component as prop
+dom elements as prop
+
+
+
+<ReviewComponent/> => meaning this this component has no child elements
+
+<div>
+ <h1> child </h1>
+</div>
+<img src='path' />
+
+<ReviewComponent/>  : Component / any dom element as prop
+
+//state as prop
+
+import ReactDOM from 'react-dom';
+import React from 'react';
+import 'bootstrap/dist/css/bootstrap.css'
+import logo from './logo.svg';
+
+
+//component as prop
+class Panel extends React.Component {
+    render() {
+        return <div className="container">
+            {
+                this.props.children
+            }
+        </div>
+    }
+}
+
+const ImageComponent = () => <img src={logo} />
+
+const Application = () => {
+    return <Panel>
+        <h1>Panel</h1>
+        <ImageComponent />
+    </Panel>
+}
+
+ReactDOM.render(<Application />, document.getElementById('root'));
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Component Life cycle methods:
+............................
+
+Parent and child components together
+
+life cycles in general not called by us. where react engine will call.
+
+order of initalization:
+
+
+Ponit: life cycle api are applied only class components not functional.
+
+
+Life of Component can be classified into three category.
+
+1.Mount
+   Inital component life
+  during mount react fires many interal apis called mount life cycle methods
+2.Update
+   when user/program interacts with component
+  during Update react fires many interal apis called Update life cycle methods
+3.UnMount
+   when component is removed from memory.
+ during UnMount react fires a interal apis called UnMount life cycle methods
+
+
+constructors : not necessary, because it has been simplified.
+  used only inital state declartion and initalization.
+
+render : must be used , to create/return virtual dom tree/object tree.
+
+componentDidMount
+ it is optional
+use cases
+1.for doing resource initalization
+   like ajax programming,timers,websockets.
+2.side effects : imperative js dom Manipulation.
+
+
+Update: 
+update cycle is triggered by three ways
+
+1.if setState is called
+2.if forceUpdate is called
+4.if cmp receives new props - dynamic
+
+
+import ReactDOM from 'react-dom';
+import React from 'react';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+class ParentComponent extends React.Component {
+
+    // state = {
+    //     like: 0
+    // }
+    //Mount cycle: inital render phase
+    constructor() {
+        super();
+        this.state = {
+            like: 0
+        }
+        console.log('Parent Constructor is called');
+    }
+    //after dom is created under javascript
+    componentDidMount() {
+        console.log('Parent componentDidMount is called');
+        //side effects
+        document.title = 'Evergent-Home'
+    }
+
+    componentDidUpdate() {
+        console.log('ParentComponent ComponentDidUpdate')
+        //side effects
+        document.title = 'Evergent-increment'
+
+
+    }
+    componentWillUnmount() {
+        //resource clean up
+        console.log('componentWillUnmount')
+    }
+    render() {
+        console.log('Parent render is called')
+        return <div>
+            <h1>ParentComponent</h1>
+            <button onClick={() => {
+                let count = this.state.count + 1;
+                this.setState({ count })
+            }}>+</button>
+            <ChildComponent  {...this.state} />
+        </div>
+    }
+
+}
+
+class ChildComponent extends React.Component {
+
+    //Mount cycle: inital render phase
+    constructor() {
+        super();
+        console.log('ChildComponent Constructor is called');
+    }
+    componentDidMount() {
+        console.log('ChildComponent componentDidMount is called');
+    }
+    componentDidUpdate() {
+        console.log('ChildComponent ComponentDidUpdate')
+    }
+    componentWillUnmount() {
+        //resource clean up
+        console.log('componentWillUnmount')
+    }
+    render() {
+        console.log('ChildComponent render is called')
+        return <div>
+            <h1>ChildComponent</h1>
+        </div>
+    }
+
+}
+
+
+const Application = () => {
+    return <div>
+        <ParentComponent />
+    </div>
+}
+ReactDOM.render(<Application />, document.getElementById('root'));
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Ajax calls:
+
+
+ajax apis:
+React has no separate ajax apis.
+
+react says you can use any third party ajax libs
+
+1.fetch
+2.axios
+3.jquery ajax
+
+apis: fake api
+jsonplaceholder
+
+
+
+mport React, { Component } from 'react';
+import { render } from 'react-dom';
+import classNames from 'classnames'
+import 'bootstrap/dist/css/bootstrap.css'
+
+class Todo extends Component {
+
+      state = {
+            error: null,
+            isLoaded: false,
+            todos: []
+      }
+      componentDidMount() {
+            const todourl = 'https://jsonplaceholder.typicode.com/todos';
+            fetch(todourl).then(response => response.json()).then(todos => {
+                  this.setState(previousState => {
+                        return { ...previousState, todos, isLoaded: true };
+                  });
+
+            },
+                  error => {
+                        this.setState({
+                              isLoaded: true,
+                              error
+                        });
+                  }
+            );
+      }
+      showCompletedTodos = () => {
+            this.setState(pstate => {
+                  let completed = pstate.todos.filter(todo => todo.completed);
+                  return {
+                        ...pstate,
+                        todos: completed
+                  }
+            });
+      }
+      render() {
+
+            const { error, isLoaded, todos } = this.state;
+
+            if (error) {
+                  return <div>Error: {error.message}</div>;
+            } else if (!isLoaded) {
+                  return <h1>Loading...</h1>;
+            } else {
+                  return (
+                        <div>
+                              <h1>TODO App</h1>
+                              <button onClick={this.showCompletedTodos} className="btn btn-success">
+                                    Show Completed Todos
+                              </button>
+                              <button className="btn btn-primary">
+                                    Show All dos
+                              </button>
+
+                              <hr />
+                              <h3>Total todos {this.state.todos.length}</h3>
+                              <ul className="list-group">
+                                    {todos.map((todo, index) => (
+                                          <li className={`list-group-item ${classNames({ 'active': todo.completed })}`} key={index}>
+                                                <span className="badge badge-pill badge-primary">
+                                                      {todo.id}
+                                                </span>
+                                                <span>
+                                                      {todo.title}
+                                                </span>
+                                          </li>
+                                    ))}
+                              </ul>
+                        </div>
+                  );
+            }
+
+      }
+}
+
+const App = () => {
+      return <div className="container">
+            <Todo />
+      </div>
+}
+
+render(<App />, document.getElementById('root'));
+
+
+
+conditional rendering:
+......................
+
+if i want to display ui(component) based on some conditions.
+
+if(error) show error component
+if(progress) -show progress component
+if(dataisavailable - show data component
+
+
+CSS :
+static css : if style is set once, cant be modified
+-className
+-style
+Dynamic styles:
+
+highlighting
+ on mouse move, i want to high light
+ on mouse leave i want to remove light
+
+ on click , i want to apply some style.
+
+<h1>test</h1> --if i move cursor on h1 , show background color.
+
+how to apply dynamic className value ?
+
+ <h1 className="bg-warning">
+
+
+threre lib called "classname"
+ <li className={`list-group-item ${classNames({ 'active': todo.completed })}`} key={index}>
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+React 16 features:
+.................
+
+In react , so many new features been introduced.
+
+Why react 16?
+
+1.add new power to react eco system
+2.simplify code base : easy to use.
+3.remove lot of boiler plate code
+4.remove unsolvable common usecases.
+
+Fragments
+Context
+Hooks
+
+code refactoring:
+React.Component = Component = import React,{Component} from 'react'
+ReactDOM.render  =>render   => import {render} from 'react-dom'
+
+React.Fragment: => Fragement = import React,{Component,Fragment} from 'react'
+
+
+import React, { Component } from 'react';
+import { render } from 'react-dom';
+
+
+
+class WelcomeComponent extends Component {
+    render() {
+        return <div>
+            <h1>Welcome Component</h1>
+        </div>
+    }
+}
+
+const App = () => <WelcomeComponent />;
+
+render(<App />, document.getElementById('root'));
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+How to avoid unncessary root /container elements?
+how to avoid jsx parent/root elements?
+
+
+
+import React, { Component, Fragment } from 'react';
+import { render } from 'react-dom';
+
+
+const GreetingComponent = () => {
+
+    // return <React.Fragment>
+    //     <h1>Welcome</h1>
+    //     <h1>How are You</h1>
+    // </React.Fragment>
+    // return <Fragment>
+    //     <h1>Welcome</h1>
+    //     <h1>How are You</h1>
+    // </Fragment>
+    return <>
+        <h1>Welcome</h1>
+        <h1>How are You</h1>
+        <Table />
+    </>
+}
+
+
+class Table extends Component {
+    render() {
+        return (
+            <table>
+                <tr>
+                    <Columns />
+                </tr>
+            </table>
+        );
+    }
+}
+class Columns extends Component {
+    render() {
+        return (
+            <>
+                <td>Hello</td>
+                <td>World</td>
+            </>
+        );
+    }
+}
+
+class WelcomeComponent extends Component {
+    render() {
+        return <div>
+            <GreetingComponent />
+        </div>
+    }
+}
+
+const App = () => <WelcomeComponent />;
+
+render(<App />, document.getElementById('root'));
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Context:
+
+Communication patterns:
+
+1.Parent -- Child  : via props
+
+2.Child ---Parent   : passing data from the child via event listner: function as prop.
+
+3.Sibliblings--component to component
+ ->Redux
+ ->Context
+
+Context:
+
+
+Data sharing between parent and child component:
+  Via props
+
+Note : data must be explicitly passed  to the child components(nested) manually.
+
+What if i want to acess data without passing as prop manually.
+
+ parent
+    |  via props
+     child
+       | via props
+        child
+       | via props
+     child
+       | --via props
+     child
+       | -- via props
+      .......
+
+
+ parent
+    |  data------------->
+     child              |
+       |                |
+        child           |
+       |                |
+     child              |
+       |                |
+     child              |
+       | <---------------      
+
+can you access the data from parent to last child without passing data via props
+
+   Yes! ---Context.
+
+Context:
+
+Objective:
+Context provides a way to pass data through the component tree without having to pass props down manually at every level.
+
+>In a typical React application, data is passed top-down (parent to child) via props.
+
+>but this can be cumbersome for certain types of props (e.g. locale preference, UI theme) that are required by many components within an application. Context provides a way to share values like these between components without having to explicitly pass a prop through every level of the tree.
+
+When to Use?
+>Context is designed to share data that can be considered  for a tree of React components, such as the current   authenticated user, theme, or preferred language. 
+
+
+
+React.Context Object Creation
+
+
+context = {
+
+ Provider: {}
+ Consumer: {}
+}
+
+const ThemeContext = React.createContext('dark');
+
+*******************************************************************************************
+
+
+
+
+
+
 
 
 
