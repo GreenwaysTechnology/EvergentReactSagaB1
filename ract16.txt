@@ -1,0 +1,790 @@
+life cycle hooks
+
+side effects
+
+React 16 features
+
+1.fragment
+
+How to avoid unncessary root /container elements?
+
+ React.Fragement
+
+
+ React.Fragement
+
+import React, { Component, Fragment } from 'react';
+import { render } from 'react-dom';
+
+//
+const Header = () => <h1>Header</h1>;
+const Footer = () => <h1>Footer</h1>;
+const Body = () => <h1>Body</h1>;
+
+//component composition
+/* const Layout = () => <div>
+      <Header />
+      <Body />
+      <Footer />
+</div>; */
+//with React.Fragement
+/* const Layout = () => <React.Fragment>
+      <Header />
+      <Body />
+      <Footer />
+</React.Fragment>; */
+//Short cut Fragment
+/* const Layout = () => <Fragment>
+      <Header />
+      <Body />
+      <Footer />
+</Fragment>; */
+//Without Fragment keywords
+const Layout = () => <>
+      <Header />
+      <Body />
+      <Footer />
+</>;
+
+render(<Layout />, document.getElementById('root'));
+
+
+class Table extends React.Component {
+  render() {
+    return (
+      <table>
+        <tr>
+          <Columns />
+        </tr>
+      </table>
+    );
+  }
+}
+class Columns extends React.Component {
+  render() {
+    return (
+      <>
+        <td>Hello</td>
+        <td>World</td>
+      </>
+    );
+  }
+}
+
+
+Result :
+
+<table>
+  <tr>
+      <td>Hello</td>
+      <td>World</td>
+  
+  </tr>
+</table>
+
+
+Context:
+Data sharing between components and among Components:
+....................................................
+
+Data sharing between parent and child component:
+  Via props
+
+Note : data must be explicitly passed  to the child components(nested) manually.
+
+What if i want to acess data without passing as prop manually
+
+Context:
+
+Objective:
+Context provides a way to pass data through the component tree without having to pass props down manually at every level.
+
+>In a typical React application, data is passed top-down (parent to child) via props.
+
+>but this can be cumbersome for certain types of props (e.g. locale preference, UI theme) that are required by many components within an application. Context provides a way to share values like these between components without having to explicitly pass a prop through every level of the tree.
+
+When to Use?
+>Context is designed to share data that can be considered  for a tree of React components, such as the current   authenticated user, theme, or preferred language. 
+
+
+React.Context Object Creation
+
+
+context = {
+
+ Provider: {}
+ Consumer: {}
+}
+
+const ThemeContext = React.createContext('dark');
+
+
+Context Object has two Objects
+
+1.Provider
+2.Consumer
+
+ThemeContext.Provider :  for sharing data
+ThemeContext.Consumer :  where you want to extract shared data via Provider.
+
+<ThemeContext.Provider value={this.theme}>
+            <Toolbar />
+</ThemeContext.Provider>
+
+
+ <ThemeContext.Consumer>
+    {theme => <Button theme={theme} />}
+ </ThemeContext.Consumer>);
+
+
+Use case 1: Introducing Context:
+...............................
+import React, { Component } from 'react';
+import { render } from 'react-dom';
+
+
+//create context object and store inside a variable called "ThemeContext"
+const ThemeContext = React.createContext('dark');
+
+//with context
+class App extends Component {
+      theme = {
+            "backgroundColor": "red",
+            "color": "white"
+      }
+      render() {
+            return <ThemeContext.Provider value={this.theme}>
+                  <Toolbar />
+            </ThemeContext.Provider>
+      }
+}
+function Toolbar(props) {
+      return (
+            <div>
+                  <ThemedButton />
+            </div>
+      );
+}
+
+function ThemedButton(props) {
+      return <ThemeContext.Consumer>
+            {theme => <Button theme={theme} />}
+      </ThemeContext.Consumer>;
+}
+function Button(props) {
+      return <button style={props.theme}>Theme</button>
+}
+
+render(<App />, document.getElementById('root'));
+
+...................................................................................
+
+import React, { Component } from 'react';
+import { render } from 'react-dom';
+
+
+//create context object and store inside a variable called "ThemeContext"
+const { Provider, Consumer } = React.createContext('dark');
+
+//with context
+class App extends Component {
+      //Global data /Shared data
+      theme = {
+            "backgroundColor": "red",
+            "color": "white"
+      }
+      render() {
+            return <Provider value={this.theme}>
+                  <Toolbar />
+            </Provider>
+      }
+}
+function Toolbar(props) {
+      return (
+            <div>
+                  <ThemedButton />
+            </div>
+      );
+}
+
+function ThemedButton(props) {
+      return <Consumer>
+            {theme => <Button label="IBM" theme={theme} />}
+      </Consumer>;
+}
+function Button(props) {
+      return <button style={props.theme}>{props.label}</button>
+}
+
+render(<App />, document.getElementById('root'));
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+Hooks:
+
+Hooks are new Feature which eliminate classes, we are going to treat function as stateful component.
+
+We are going to abstract state inside functions. : every thing is function
+
+
+
+1.useState
+
+const [count,setCount]= useState(initalState)
+
+useState Hooks can take primitive as well in the source , interally react "hooks into literal object".
+old react only we can have literal object
+
+
+
+
+import React, { useState } from 'react';
+import { render } from 'react-dom';
+
+
+function Counter(props) {
+      const [count, setCount] = useState(0);
+      return <div>
+            <h1>Counter App</h1>
+            <h2>Counter : {count}</h2>
+            {/*  <button onClick={() => setCount(count + 1)}>increment</button> */}
+            <button onClick={() => setCount(prevState => {
+                  console.log(`Previouse State ${prevState}`)
+                  return prevState + 1
+            })}>
+                  increment
+          </button>
+            <button onClick={() => setCount(count - 1)}>decrement</button>
+      </div>
+}
+
+Adding multiple state variables:
+import React, { useState } from 'react';
+import { render } from 'react-dom';
+
+function Counter(props) {
+      const [incrementValue, setincrementValue] = useState(props.incrementSeed);
+      const [decrementValue, setdecrementValue] = useState(props.decrementSeed);
+      
+      return <div>
+            <h1>Counter App</h1>
+            <h2>Increment Value : {incrementValue}</h2>
+            <h2>Decrement Value : {decrementValue}</h2>
+
+            <button onClick={() => setincrementValue(prevState => {
+                  console.log(`Previouse State ${prevState}`)
+                  return prevState + 1
+            })}>
+                  increment
+          </button>
+            <button onClick={() => setdecrementValue(decrementValue - 1)}>decrement</button>
+      </div>
+}
+
+
+render(<Counter incrementSeed={50} decrementSeed={20} />, document.getElementById('root'));
+
+
+import React, { useState } from 'react';
+import { render } from 'react-dom';
+
+//state as literal object
+
+function FeedBack(props) {
+
+      const state = { like: 10 };
+      const [feedback, setFeedback] = useState(state);
+
+      function increment() {
+            let like = feedback.like + 1;
+            setFeedback({ ...feedback, like });
+      }
+      return <div>
+            <p>Your Feedback {feedback.like}</p>
+
+            <button onClick={increment}>
+                  increment
+         </button>
+      </div>
+}
+
+
+render(<FeedBack />, document.getElementById('root'));
+
+
+//arrow version
+const FeedBack = (props) => {
+      const state = { like: 10 };
+      const [feedback, setFeedback] = useState(state);
+      const increment = () => {
+            let like = feedback.like + 1;
+            setFeedback({ ...feedback, like });
+      };
+      return <div>
+            <p>Your Feedback {feedback.like}</p>
+            <button onClick={increment}>
+                  increment
+         </button>
+      </div>;
+};
+
+Side Effects,DOM manipulation,Memory Management:
+................................................
+
+What is side effects?
+ Changing DOM elements after vdom is mounted into real dom, and if you trigger update cycle,vdom is prepared, starts changing the dom layout.
+
+eg: i want to change the browser title of my application based on screen name
+
+Browser title in the inital phase
+   -Customer
+once if i start doing operations, like add,delete,update,search....
+  -Customer-add  / -Customer-delete -Customer-update
+
+if i am adding javascript dom listener,doing some side effects.
+
+ -you need to add listener, and also you need to remove listener.
+
+ window.addEventListener('resize',function(){
+    //side effects
+ });
+ window.removeEventListener('resize',function(){
+    //side effects
+ });
+
+import React, { Component } from 'react';
+import { render } from 'react-dom';
+
+//Side effects using old react style
+
+class Customer extends Component {
+
+
+      state = {
+            screen: 'Customer Manager App'
+      }
+      add = () => {
+            this.setState({ screen: 'Customer Manager App - Add ' })
+      }
+      render() {
+            return <div>
+                  <h1>Customer Manager App: using Side effects</h1>
+                  <button onClick={this.add} >Add</button>
+            </div>
+      }
+      //side effeects with inital / mount cycle
+      componentDidMount() {
+            //imperative dom
+            document.title = this.state.screen;
+      }
+      //side effects with update cycle
+      componentDidUpdate() {
+            document.title = this.state.screen;
+      }
+}
+
+render(<Customer />, document.getElementById('root'));
+///////////////////////////////////////////////////////////////////////////////////
+
+Side Effects,DOM manipulation,Memory Management using functional Components
+...........................................................................
+
+useEffect hook : 
+
+ ->useEffect is replacement of componentDidMount and componentDidUpdate
+
+
+import React, { useState, useEffect } from 'react';
+import { render } from 'react-dom';
+
+
+
+function Customer(props) {
+
+      const [screen, setScreen] = useState('Customer Manager App');
+
+      //Performing side effects
+      useEffect(function () {
+            document.title = screen;
+      });
+
+      function changeTitle() {
+            setScreen('Customer Manager App -Add');
+      }
+
+
+      return <div>
+            <h1>Customer Manager App: Function using Side effects</h1>
+            <button onClick={changeTitle} >Add</button>
+
+      </div>
+}
+
+render(<Customer />, document.getElementById('root'));
+************************************************************************************
+
+Resoure Handling: how to avoid memory leaks
+
+Where do you write memory clean up activties in old react?
+
+componentWillunMount(){
+  window.removeListener('resize');
+}
+
+In useEffect hooks:
+ return a funciton, inside write a clean up code.
+
+import React, { useState, useEffect } from 'react';
+import { render } from 'react-dom';
+
+
+
+function Customer(props) {
+
+      const [screen, setScreen] = useState('Customer Manager App');
+      //declarating variable to hold current window width
+      const [width, setWidth] = useState(window.innerWidth);
+
+      //Performing side effects
+      useEffect(function () {
+            document.title = screen;
+      });
+
+      useEffect(() => {
+            const handleResize = () => setWidth(window.innerWidth);
+            //add listener
+            window.addEventListener('resize', handleResize);
+
+            //clean up code 
+            /**write a function which will be called by react internally */
+            return () => {
+                  window.removeEventListener('resize', handleResize);
+            };
+
+      });
+
+      function changeTitle() {
+            setScreen('Customer Manager App -Add');
+      }
+
+
+      return <div>
+            <h1>Customer Manager App: Function using Side effects</h1>
+            <button onClick={changeTitle} >Add</button>
+            <h2>Current Window width {width}</h2>
+
+      </div>
+}
+
+render(<Customer />, document.getElementById('root'));
+
+
+.................................................................................
+In the above we have so many hooks which makes your code less maintainable,testable,code duplatication(window resize)
+
+
+Custom Hooks, we can write our own hooks.
+
+hooks are just simple javascript function, can be named any but recommened is
+start with "use+HookName".
+
+
+
+src/windowhooks/useCustomwindowHook.js
+
+import { useState, useEffect } from 'react';
+
+//custom hooks
+const useWindowWidth = () => {
+      const [width, setWidth] = useState(window.innerWidth);
+      useEffect(() => {
+            const handleResize = () => setWidth(window.innerWidth);
+            window.addEventListener('resize', handleResize);
+            return () => {
+                  window.removeEventListener('resize', handleResize);
+            };
+      });
+      //must return state
+      return width;
+}
+export { useWindowWidth };
+
+
+Using custom hooks:
+import React, { useState, useEffect } from 'react';
+import { render } from 'react-dom';
+import { useWindowWidth } from './windowhooks/usewindowWidthHook';
+
+function Customer(props) {
+      const [screen, setScreen] = useState('Customer Manager App');
+      const width = useWindowWidth();
+      //Performing side effects
+      useEffect(function () {
+            document.title = screen;
+      });
+
+      function changeTitle() {
+            setScreen('Customer Manager App -Add');
+      }
+
+
+      return <div>
+            <h1>Customer Manager App: Function using Side effects</h1>
+            <button onClick={changeTitle} >Add</button>
+            <h2>Current Window width {width}</h2>
+
+      </div>
+}
+
+
+
+
+
+render(<Customer />, document.getElementById('root'));
+
+******************************************************************************************
+
+////////////////////////////////////////////////////////////////////////////////
+
+Context with help of hooks : useContext
+
+src/globaldata/themecontext.js
+
+import React from 'react';
+
+const theme = {
+      "backgroundColor": "red",
+      "color": "white"
+}
+export const ThemeContext = React.createContext(theme);
+
+
+
+import React, { useState, useEffect, useContext } from 'react';
+import { render } from 'react-dom';
+import { useWindowWidth } from './windowhooks/usewindowWidthHook';
+import { ThemeContext } from './globaldata/themecontext';
+
+function Customer(props) {
+      const [screen, setScreen] = useState('Customer Manager App');
+      const width = useWindowWidth();
+      const theme = useContext(ThemeContext);
+      //Performing side effects
+      useEffect(function () {
+            document.title = screen;
+      });
+
+      function changeTitle() {
+            setScreen('Customer Manager App -Add');
+      }
+
+      return <div style={theme}>
+            <h1>Customer Manager App: Function using Side effects</h1>
+            <button onClick={changeTitle} >Add</button>
+            <h2>Current Window width {width}</h2>
+
+      </div>
+}
+
+
+render(<Customer />, document.getElementById('root'));
+
+Ajax Calls Using useEffect hook: functional Components:
+******************************************************
+
+then(fun1,fun2)
+
+import React, { useState, useEffect } from 'react';
+import { render } from 'react-dom';
+
+function Users() {
+      const [users, setUsers] = useState({
+            error: null,
+            isLoaded: false,
+            items: []
+      });
+      useEffect(() => {
+            const url = `https://jsonplaceholder.typicode.com/users`;
+            fetch(url).then(response => response.json())
+                  .then(result => {
+                    setUsers({ ...users, isLoaded: true, items: result })
+                  }, 
+                  (error) => {
+                 
+                        setUsers({ ...users, isLoaded: true, error: error })
+                  })
+      });
+      if (users.error) {
+            return <div>Error: {users.error.message}</div>;
+      } else if (!users.isLoaded) {
+            return <div>Loading...</div>;
+      } else {
+            return (
+                  <ul>
+                        {users.items.map((user, index) => (
+                              <li key={index}>
+                                    {user.username} {user.email}
+                              </li>
+                        ))}
+                  </ul>
+            );
+      }
+}
+render(<Users />, document.getElementById('root'));
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+forms : class based:
+
+import React, { Component } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+class Form extends Component {
+
+      leaves = ['Sick', 'Medical', 'Causal', 'Earned', 'others'];
+      state = {
+            firstName: 'firstName',
+            lastName: 'lastName',
+            leaveType: this.leaves[0]
+      }
+      handleChange = evt => {
+            //Get control name,input,select box
+            const name = evt.target.name;
+            //Get control's value
+            const value = evt.target.value;
+
+            this.setState({
+                  [name]: value // [firstName] : 'subramanian' [lastName]='' [leaveType]='MedicalLeave'
+            });
+      }
+      onSave = evt => {
+            evt.preventDefault(); //will stop submitting form to server automatically.
+            console.log(JSON.stringify(this.state))
+      }
+
+      render() {
+            return <div>
+                  <h1>User Form</h1>
+                  <h2>{JSON.stringify(this.state)}</h2>
+                  <form onSubmit={this.onSave}>
+                        <div className="form-group">
+                              <label htmlFor="firstName">First Name</label>
+                              <input required onChange={this.handleChange} type="text" className="form-control" id="firstName" placeholder="Enter First name" name="firstName" value={this.state.firstName} />
+                        </div>
+                        <div className="form-group">
+                              <label htmlFor="lastName">Last Name</label>
+                              <input onChange={this.handleChange} type="text" className="form-control" id="lastName" placeholder="Enter last name" name="lastName" value={this.state.lastName} />
+                        </div>
+                        <div className="form-group">
+                              <label htmlFor="leaveType">Leave Type</label>
+ <select name="leaveType" className="form-control" value={this.state.leaveType} onChange={this.handleChange}>
+                {this.leaves.map((leave, index) => {
+                      return <option key={index} value={leave}>{leave}
+                      </option>
+                      })};
+             </select>
+             </div>
+   <button type="submit" className="btn btn-primary">Submit</button>
+
+                  </form>
+            </div >
+      }
+}
+
+
+const App = () => {
+      return <div className="container">
+            <Form />
+      </div>
+}
+
+render(<App />, document.getElementById('root'));
+
+
+
+
+
+
+const useFormInput = (initialValue) => {
+
+  const [value, setValue] = useState(initialValue);
+
+  const handleChange = (e) => {
+
+    setValue(e.target.value);
+
+  }
+
+  return {
+
+    value,
+
+    onChange: handleChange
+
+  };
+
+}
+
+
+import React, { useState } from 'react';
+import { render } from 'react-dom';
+
+
+function Form() {
+      const firstNameRef = useFirstName('Subramanian')
+      const lastNameRef = useLastName('Murugan');
+      const [submitted, setSubmitted] = useState(false);
+      const handleSubmit = (e) => {
+            e.preventDefault();
+            let data = {
+                  firstName: firstNameRef.firstName,
+                  lastName: lastNameRef.lastName
+            }
+            setSubmitted(true);
+            alert(JSON.stringify(data));
+      };
+
+      return <div>
+            <h1>Form</h1>
+            <h3>{firstNameRef.firstName} {lastNameRef.lastName}</h3>
+            <form onSubmit={handleSubmit}>
+                  <div>
+                        First Name :<input {...firstNameRef} value={firstNameRef.firstName} />
+                  </div>
+                  <div>
+                        Last Name :<input {...lastNameRef} value={lastNameRef.lastName} />
+                  </div>
+                  <div>
+                        <input type="submit" value="Submit" />
+                  </div>
+            </form>
+
+      </div>
+}
+const useFirstName = (initialValue) => {
+      const [firstName, setFirstName] = useState(initialValue);
+      const handleChange = e => {
+            setFirstName(e.target.value);
+      }
+      return {
+            firstName,
+            onChange: handleChange
+      };
+
+}
+
+const useLastName = (initialValue) => {
+      const [lastName, setLastName] = useState(initialValue);
+      const handleChange = e => {
+            setLastName(e.target.value);
+      }
+      return {
+            lastName,
+            onChange: handleChange
+      };
+
+};
+
+
+render(<Form />, document.getElementById('root'));

@@ -2785,7 +2785,851 @@ context = {
 
 const ThemeContext = React.createContext('dark');
 
+ThemeContext.Provider
+ThemeContext.Consumer
+
 *******************************************************************************************
+
+Without context , passing props to child components:
+....................................................
+
+import React, { Component } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+
+//Parent Component
+
+class App extends Component {
+    //common theme
+    theme = {
+        "backgroundColor": "red",
+        "color": "white"
+    }
+
+    render() {
+        return <>
+            <h1>Parent Component</h1>
+            <ToolBar theme={this.theme} />
+        </>
+    }
+}
+//child component 1
+function ToolBar(props) {
+
+    return <>
+        <ThemedButton theme={props.theme} />
+    </>
+}
+//child component 2
+
+function ThemedButton(props) {
+    return <>
+        <Button theme={props.theme} />
+    </>
+}
+//child component 3
+
+function Button(props) {
+    return <button style={props.theme}>Theme</button>
+}
+
+render(<App />, document.getElementById('root'))
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+How to avoid props and how we can access theme from app to button.
+
+Note: React provides lot of built in components
+
+1.React.Fragment
+
+
+Provider :
+  It is object used to pass "data" to child components without passing them
+
+Consumer:
+ It is object used to consume "data" which was injected by Parent compoent
+
+
+import React, { Component } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+//create Context Object
+const ThemeContext = React.createContext('dark')
+
+//Parent Component
+class App extends Component {
+    //common theme
+    theme = {
+        "backgroundColor": "red",
+        "color": "white"
+    }
+
+    render() {
+        return <>
+            <h1>Parent Component</h1>
+            <ThemeContext.Provider value={this.theme}>
+                <ToolBar />
+            </ThemeContext.Provider>
+        </>
+    }
+}
+//child component 1
+function ToolBar(props) {
+
+    return <>
+        <ThemedButton />
+    </>
+}
+//child component 2
+
+function ThemedButton(props) {
+    return <>
+        <Button />    </>
+}
+//child component 3
+
+function Button(props) {
+
+    return <ThemeContext.Consumer>
+        {theme => <button style={theme}>Theme</button>}
+    </ThemeContext.Consumer>
+}
+
+render(<App />, document.getElementById('root'))
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+import React, { Component } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+//create Context Object
+const { Provider, Consumer } = React.createContext('dark')
+
+//Parent Component
+class App extends Component {
+    //common theme
+    theme = {
+        "backgroundColor": "red",
+        "color": "white"
+    }
+
+    render() {
+        return <>
+            <h1>Parent Component</h1>
+            <Provider value={this.theme}>
+                <ToolBar />
+            </Provider>
+        </>
+    }
+}
+//child component 1
+function ToolBar(props) {
+
+    return <>
+        <ThemedButton />
+    </>
+}
+//child component 2
+
+function ThemedButton(props) {
+    return <>
+        <Button />    </>
+}
+//child component 3
+
+function Button(props) {
+
+    return <Consumer>
+        {theme => <button style={theme}>Theme</button>}
+    </Consumer>
+}
+
+render(<App />, document.getElementById('root'))
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+React 16 feature:
+
+method return
+
+render method must return only react Element(Object) before react 16
+
+
+Return values:
+
+1.null
+2.string,number,boolean
+3.array
+4.jsx
+5.React.CreateElement =Element
+6.Portal
+
+
+import React, { Component } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+//react return values
+
+const Welcome = () => {
+    //return <h1>JSX</h1>
+    //return null;
+    //return "Hello"
+    //return true;
+    //return 100
+    //return [1, 2, 3, 45, 67]
+    return React.createElement('h1',null,'Hello')
+}
+
+render(<Welcome />, document.getElementById('root'))
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+Hooks:
+.....
+Hook is a special function that lets y "hooks into" react features.
+
+
+objective of hooks:
+
+1.to eleminate class components as much possible.
+
+2.Resuable application behaviours
+  eg:ajax calls
+
+eg Hooks:
+
+1.if i am going to remove class means, how can i handle state inside function components.
+  useState hook
+
+"use"+functionName ==>hook Syntax
+"useState"
+"useContext"
+"useEffect"
+"useAjax"
+"useWebSocket"
+ 
+Use case 1 : write class component, replace this with hooks. inside function component 
+
+//React.useState === > {useState}
+
+state value must be object in class compoent
+ state = {
+    count:0
+  }
+
+in useState hook, you can declare even primitives ==only in source code,but inside hook
+ your variables will be wrapped by literal object
+
+ const [counter]=useState(0) ====>useState({counter:0})
+
+setState method  inside hook  you need not use setState convention instead of 
+ setVariable  ===>setCounter
+
+
+//hooks
+import ReactDOM from 'react-dom';
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+//Before hooks :class components
+
+/**
+class CounterComponent extends React.Component {
+
+    state = {
+        counter: 0 // inital value
+    };
+
+    //Listener method
+    onIncrement = () => {
+        let counter = this.state.counter + 1;
+        this.setState({ counter });
+    }
+
+    render() {
+        console.log('render method is called', this.state.counter);
+        return <div className="container">
+            <h1>Counter Application</h1>
+            <h3>Counter : {this.state.counter}</h3>
+            <button className="btn btn-success" onClick={this.onIncrement}>+</button>
+        </div>
+    }
+}
+const Application = () => <CounterComponent />
+
+ReactDOM.render(<Application />, document.getElementById('root'));
+*/
+
+//Hooks
+// function CounterComponent(props) {
+//     //hooks
+//     const [counter, setCounter] = useState(10)
+//     function onDecrement() {
+//         setCounter(counter - 1)
+//     }
+//     return <div className="container">
+//         <h1>Counter Application</h1>
+//         <h2>Counter : {counter}</h2>
+//         {/* <button onClick={() => setCounter(prevState => {
+//             console.log(`Previouse State ${prevState}`)
+//             return prevState + 1
+//         })}> +</button> */}
+//         <button onClick={() => setCounter(counter + 1)}>+</button>
+//         <button onClick={onDecrement}>-</button>
+
+//     </div>
+// }
+
+const CounterComponent = (props) => {
+    //hooks
+    const { seedValue } = props;
+    const [counter, setCounter] = useState(seedValue)
+
+    const onDecrement = () => {
+        setCounter(counter - 1)
+    }
+    return <div className="container">
+        <h1>Counter Application</h1>
+        <h2>Counter : {counter}</h2>
+        {/* <button onClick={() => setCounter(prevState => {
+            console.log(`Previouse State ${prevState}`)
+            return prevState + 1
+        })}> +</button> */}
+        <button onClick={() => setCounter(counter + 1)}>+</button>
+        <button onClick={onDecrement}>-</button>
+
+    </div>
+}
+
+CounterComponent.defaultProps = {
+    seedValue: 2
+}
+
+const Application = () => <>
+    <CounterComponent seedValue={10} />
+    <hr></hr>
+    <CounterComponent />
+
+</>
+
+ReactDOM.render(<Application />, document.getElementById('root'));
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+
+Adding multiple state variables:
+import React, { useState } from 'react';
+import { render } from 'react-dom';
+
+function Counter(props) {
+      const [incrementValue, setincrementValue] = useState(props.incrementSeed);
+      const [decrementValue, setdecrementValue] = useState(props.decrementSeed);
+      
+      return <div>
+            <h1>Counter App</h1>
+            <h2>Increment Value : {incrementValue}</h2>
+            <h2>Decrement Value : {decrementValue}</h2>
+
+            <button onClick={() => setincrementValue(prevState => {
+                  console.log(`Previouse State ${prevState}`)
+                  return prevState + 1
+            })}>
+                  increment
+          </button>
+            <button onClick={() => setdecrementValue(decrementValue - 1)}>decrement</button>
+      </div>
+}
+
+
+render(<Counter incrementSeed={50} decrementSeed={20} />, document.getElementById('root'));
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+useState with literal Object:
+
+import React, { useState } from 'react';
+import { render } from 'react-dom';
+
+//state as literal object
+
+const FeedBack = (props) => {
+      const state = { like: 10 };
+      const [feedback, setFeedback] = useState(state);
+      const increment = () => {
+            let like = feedback.like + 1;
+            setFeedback({ ...feedback, like });
+      };
+      return <div>
+            <p>Your Feedback {feedback.like}</p>
+            <button onClick={increment}>
+                  increment
+         </button>
+      </div>;
+};
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Side Effects: how did you handle side effects in class components:
+  Life cycle methods : componentDidMount, and ComponentDidUpdate
+
+how to the above life cycle methods in the functional component?
+
+we can use hook called useEffect hook 
+
+What is side effects?
+ Changing DOM elements after vdom is mounted into real dom, and if you trigger update cycle,vdom is prepared, starts changing the dom layout.
+
+eg: i want to change the browser title of my application based on screen name
+
+Browser title in the inital phase
+   -Customer
+once if i start doing operations, like add,delete,update,search....
+  -Customer-add  / -Customer-delete -Customer-update
+
+if i am adding javascript dom listener,doing some side effects.
+
+ -you need to add listener, and also you need to remove listener.
+
+ window.addEventListener('resize',function(){
+    //side effects
+ });
+ window.removeEventListener('resize',function(){
+    //side effects
+ });
+
+//Side effects using old react style
+class Customer extends Component {
+
+
+      state = {
+            screen: 'Customer Manager App'
+      }
+      add = () => {
+            this.setState({ screen: 'Customer Manager App - Add ' })
+      }
+      render() {
+            return <div>
+                  <h1>Customer Manager App: using Side effects</h1>
+                  <button onClick={this.add} >Add</button>
+            </div>
+      }
+      //side effeects with inital / mount cycle
+      componentDidMount() {
+            //imperative dom
+            document.title = this.state.screen;
+      }
+      //side effects with update cycle
+      componentDidUpdate() {
+            document.title = this.state.screen;
+      }
+}
+
+render(<Customer />, document.getElementById('root'));
+
+Side Effects,DOM manipulation,Memory Management using functional Components
+...........................................................................
+
+useEffect hook : 
+
+ ->useEffect is replacement of componentDidMount and componentDidUpdate
+
+
+import React, { useState, useEffect } from 'react';
+import { render } from 'react-dom';
+
+
+function Customer(props) {
+
+    const [screen, setScreen] = useState('Customer Manager App');
+    //Performing side effects
+    useEffect(function () {
+        //side effects
+        document.title = screen;
+    });
+    function changeTitle() {
+        setScreen('Customer Manager App -Add');
+    }
+    return <div>
+        <h1>Customer Manager App: Function using Side effects</h1>
+        <button onClick={changeTitle} >Add</button>
+
+    </div>
+}
+
+render(<Customer />, document.getElementById('root'));
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+Resoure Handling: how to avoid memory leaks
+
+Where do you write memory clean up activties in old react?
+
+componentWillunMount(){
+  window.removeListener('resize');
+}
+
+In useEffect hooks:
+ return a funciton, inside write a clean up code.
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+import React, { useState, useEffect } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+/**
+ * 
+ * The below is not scalable;
+ * the window resize behaviour i want in other component as well then again i have 
+ * write code inside : code duplication
+ * as app dev, he requires many utilties like window resize...
+ * 
+ */
+
+function CustomerComponent({ title }) {
+    const [screen, setScreen] = useState(title)
+    //declare variable to hold currnt window width
+    const [width, setWidth] = useState(window.innerWidth);
+    //feature using hooks
+
+    //feature using hooks
+
+    //set screen title 
+    useEffect(() => {
+        //side effects
+        document.title = screen;
+        //handler function
+        const handlerResize = () => setWidth(window.innerWidth)
+        window.addEventListener('resize', handlerResize)
+
+        //component will unmount
+        return () => {
+            window.removeEventListener('resize')
+        }
+
+    })
+    return <div className="container">
+        <h1>Customer Management App</h1>
+        <h2>Current Screen Width : {width}</h2>
+    </div>
+}
+
+const App = () => <CustomerComponent title="Customer Manager App" />
+
+render(<App />, document.getElementById('root'));
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+Custom Hooks, we can write our own hooks
+
+hooks are just simple javascript function,can be named any but recommend is start with
+"use+HookName".
+
+src/hooks/usewindowTitleHook.js
+
+import React, { useEffect } from 'react';
+//this hook not returning any value
+export const useWindowSetTitle = screen => {
+    useEffect(() => {
+        //side effects
+        document.title = screen;
+    })
+}
+
+src/hooks/useWindowidthHook.js
+import React, { useState, useEffect } from 'react';
+//custom hook
+//Custom hook may return value or may not
+export const useWindowWidth = () => {
+    //declare variable to hold currnt window width
+    const [width, setWidth] = useState(window.innerWidth);
+    useEffect(() => {
+        //handler function
+        const handlerResize = () => setWidth(window.innerWidth)
+        window.addEventListener('resize', handlerResize)
+        //component will unmount
+        return () => {
+            window.removeEventListener('resize', handlerResize)
+        }
+    })
+    return width;
+
+}
+
+src/hooks/index.js
+
+export { useWindowWidth } from './useWindowWidthHook';
+export { useWindowSetTitle } from './useSetWindowTitleHook'
+
+
+
+src/index.js
+import React, { useState, useEffect } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+import { useWindowWidth, useWindowSetTitle } from './hooks';
+
+function CustomerComponent({ title }) {
+    const [screen, setScreen] = useState(title)
+    useWindowSetTitle(screen)    
+    return <div className="container">
+        <h1>Customer Management App</h1>
+        <h2>Current Screen Width : {useWindowWidth()}</h2>
+    </div>
+}
+
+const App = () => <CustomerComponent title="CMS - Evergent" />
+
+render(<App />, document.getElementById('root'));
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+How to use  "useContext"?
+
+
+import React, { useState, useEffect, useContext } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+import { useWindowWidth, useWindowSetTitle } from './hooks';
+
+const theme = {
+    "backgroundColor": "red",
+    "color": "white"
+}
+export const ThemeContext = React.createContext(theme)
+
+
+function CustomerComponent({ title }) {
+    const [screen, setScreen] = useState(title)
+    const theme = useContext(ThemeContext);
+    useWindowSetTitle(screen)
+    return <div className="container">
+        <h1 style={theme}>Customer Management App</h1>
+        <h2>Current Screen Width : {useWindowWidth()}</h2>
+    </div>
+}
+
+const App = () => <CustomerComponent title="CMS - Evergent" />
+
+render(<App />, document.getElementById('root'));
+////////////////////////////////////////////////////////////////////////////////////////////
+
+How ajax calls using hooks?
+
+
+
+then(fun1,fun2)
+
+import React, { useState, useEffect } from 'react';
+import { render } from 'react-dom';
+
+function Users() {
+      const [users, setUsers] = useState({
+            error: null,
+            isLoaded: false,
+            items: []
+      });
+      useEffect(() => {
+            const url = `https://jsonplaceholder.typicode.com/users`;
+            fetch(url).then(response => response.json())
+                  .then(result => {
+                    setUsers({ ...users, isLoaded: true, items: result })
+                  }, 
+                  (error) => {
+                 
+                        setUsers({ ...users, isLoaded: true, error: error })
+                  })
+      });
+      if (users.error) {
+            return <div>Error: {users.error.message}</div>;
+      } else if (!users.isLoaded) {
+            return <div>Loading...</div>;
+      } else {
+            return (
+                  <ul>
+                        {users.items.map((user, index) => (
+                              <li key={index}>
+                                    {user.username} {user.email}
+                              </li>
+                        ))}
+                  </ul>
+            );
+      }
+}
+render(<Users />, document.getElementById('root'));
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Form Handling:
+.............
+
+1.class based 
+2.hooks
+
+
+FORM input elements
+textbox,radio,checkbox,select
+
+how to get value of the these controls inside react component (inside listener function)
+
+
+HOW TO read/manipulate dom elements using react?
+
+react uses two pattern
+
+1.through event Object
+  Event Object is proxy/broker object which is created and attached on to every html element
+/dom object.
+
+Javascript Event Object:
+
+ "EventTarget" -Object
+
+since this object is already created, how to get this object into our program.
+
+Js:
+<button onclick="sayHello()">
+
+//listener function : type of e is "EventTarget"
+function sayHello(e){
+    //get button object inside this function 
+}
+
+In react, we cant access "EventTarget" directly , because react engine provides one more proxy
+SyntheticEvent
+
+SyntheticEvent is object inside react.
+
+
+Flow
+ React listener -----will talk to --->SyntheticEvent ----->EventTarget----DOM
+
+
+SyntheticEvent Object apis:
+
+boolean bubbles
+boolean cancelable
+DOMEventTarget currentTarget
+boolean defaultPrevented
+number eventPhase
+boolean isTrusted
+DOMEvent nativeEvent
+void preventDefault()
+boolean isDefaultPrevented()
+void stopPropagation()
+boolean isPropagationStopped()
+void persist()
+DOMEventTarget target
+number timeStamp
+string type
+
+
+
+import React, { Component } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+class Form extends Component {
+
+    //select box values
+    leaves = ['Sick', 'Medical', 'Causal', 'Earned', 'others'];
+    //state : form values
+    state = {
+        firstName: 'firstname',
+        lastName: 'lastname',
+        leaveType: this.leaves[0]
+    }
+
+    // //textbox1 
+    // firstNameHandler = e => {
+    //     console.log(e.target.value);
+
+    // }
+    // //textbox 2
+    // lastNameHandler = e => {
+    //     console.log(e.target.value);
+    // }
+    //listener
+    //evt is type of SyntheticEvent
+    handleChange = (evt) => {
+        //get the text box values
+        //which text box value
+        //Get control name,input,select box
+        const name = evt.target.name;
+        //Get control's value
+        const value = evt.target.value;
+        this.setState({
+            [name]: value // [firstName] : 'subramanian' [lastName]='' [leaveType]='MedicalLeave'
+        });
+
+    }
+    //listener
+    onSave = evt => {
+        evt.preventDefault(); //will stop submitting form to server automatically.
+        alert(JSON.stringify(this.state))
+    }
+
+    render() {
+        return <div>
+            <h1>User Form</h1>
+            <h2>{JSON.stringify(this.state)}</h2>
+            <form onSubmit={this.onSave}>
+                <div className="form-group">
+                    <label htmlFor="firstName">First Name</label>
+                    <input required onChange={this.handleChange} type="text" className="form-control" id="firstName" placeholder="Enter First name" name="firstName" value={this.state.firstName} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="lastName">Last Name</label>
+                    <input onChange={this.handleChange} type="text" className="form-control" id="lastName" placeholder="Enter last name" name="lastName" value={this.state.lastName} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="leaveType">Leave Type</label>
+                    <select name="leaveType" className="form-control" value={this.state.leaveType} onChange={this.handleChange}>
+                        {this.leaves.map((leave, index) => {
+                            return <option key={index} value={leave}>{leave}
+                            </option>
+                        })};
+   </select>
+                </div>
+                <button type="submit" className="btn btn-primary">Submit</button>
+
+            </form>
+        </div >
+    }
+}
+
+const App = () => {
+    return <div className="container">
+        <Form />
+    </div>
+}
+
+render(<App />, document.getElementById('root'));
+/////////////////////////////////////////////////////////////////////////////////////////////
+Forms && Hooks:
+
+
+
+
+
+
+
+
+2.through ref pattern(reference) : Uncontrolled component
+
+
+
 
 
 
