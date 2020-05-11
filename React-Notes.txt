@@ -3619,14 +3619,616 @@ render(<App />, document.getElementById('root'));
 /////////////////////////////////////////////////////////////////////////////////////////////
 Forms && Hooks:
 
+//how to write forms using hooks.
+
+import React, { Component, useState } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+function Form() {
+    //first Name
+    const firstNameRef = useFirstName('Subramanian');
+    //last Name
+    const lastNameRef = useLastName('Murugan')
+    //Form submisssion state
+    const [submitted, setSubmitted] = useState(false);
+
+    //submit form 
+    const handleFormSubmit = e => {
+        e.preventDefault();
+        let data = {
+            firstName: firstNameRef.firstName,
+            lastName: lastNameRef.lastName
+        }
+        setSubmitted(true);
+        //collect the data
+        alert(JSON.stringify(data))
+    }
+
+    //ui
+    return <div>
+        <h1>Form Using Hooks</h1>
+        <pre>{firstNameRef.firstName} {lastNameRef.lastName}</pre>
+        <form onSubmit={handleFormSubmit}>
+            <div>
+                First Name <input {...firstNameRef} value={firstNameRef.firstName} />
+
+            </div>
+            <div>
+                Last Name <input {...lastNameRef} value={lastNameRef.lastName} />
+
+            </div>
+            <div>
+                <input type="submit" value="Submit" />
+            </div>
+
+        </form>
+
+    </div>
+
+
+}
+//firstName
+const useFirstName = initalValue => {
+    const [firstName, setFirstName] = useState(initalValue);
+    //event handler
+    const handleChange = e => {
+        setFirstName(e.target.value)
+    }//
+    //return object having state,listener
+    return {
+        firstName,
+        onChange: handleChange
+    }
+
+}
+//lastName
+const useLastName = initalValue => {
+    const [lastName, setLastName] = useState(initalValue);
+    //event handler
+    const handleChange = e => {
+        setLastName(e.target.value)
+    }//
+    //return object having state,listener
+    return {
+        lastName,
+        onChange: handleChange
+    }
+
+}
 
 
 
 
+const App = () => {
+    return <div className="container">
+        <Form />
+    </div>
+}
 
+render(<App />, document.getElementById('root'));
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 
 2.through ref pattern(reference) : Uncontrolled component
+
+Dom element can be accessed without help of event object.
+
+why
+
+1.some dom properties have not been exposed via event object
+ eg. if you want to trigger some methods like "focus", which is not present via event object.
+
+what if i want those apis.
+
+2.if i want to integrate third party dom manipulation libs like jquery.
+
+ Yes
+
+Soultion is Ref patterns:
+ ref means reference, dom reference.
+
+Caution:
+ dont over use ref pattern, the reason is "ref" access dom element directly without react
+internal render cycle, that may degrade performance of application.
+
+The component access the reference , called as unControlled Components.
+eg:
+
+ <input ref="referenceName" />
+
+React provides "useRef" hook to simplify reference access.
+
+import React, { Component, useRef, useState, useEffect } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+
+//useRef hooks
+const TextInputWithFocusButton = () => {
+    const inputEl = useRef(null);
+    useEffect(() => {
+        console.log(inputEl.current.value)       
+    })
+    const onButtonClick = () => {
+        // `current` points to the mounted text input element
+        inputEl.current.focus();
+
+    };
+    return <div>
+        <input ref={inputEl} type="text"   value="Some" />
+        <button onClick={onButtonClick}>Focus the input</button>
+    </div>
+
+}
+
+
+const App = () => {
+    return <div className="container">
+        <TextInputWithFocusButton />
+    </div>
+}
+
+render(<App />, document.getElementById('root'));
+
+////////////////////////////////*******************//////////////////////////////////////////
+
+                                     Redux
+                             (Red-Reducer | Ux - Flux)
+
+What is Redux?
+
+ Redux is State Container for any Js Application.
+
+ State Container or State layer
+
+State : data  layer.
+
+Similar concept in server side  :MVC 
+
+When y build User inteface application two things are common "data"(model) and UI markup(View)
+in order to bridge model and view we use "controller" 
+
+                             View------Controller<----->Service Layer <--->Model
+
+Typical all ui applications follow these design patterns
+	1.MVC
+        2.MVVM
+
+When face book started working on same ui application,face book could not use MVC OR MVVM 
+design pattern to solve their problems.
+
+Face book team designed a design pattern "Flux" design pattern to move data from service layer to view layer.
+  1.Single /One way data flow model.
+
+
+Architecture:
+.............
+  View
+   What it displays : data + ui markpu
+
+  Model && its logic
+    Store
+	The place where you can keep data
+	The place where you can change data - biz logic(services)
+
+
+  View and Store Communication:
+  .............................
+
+   View
+     |
+     Store
+	
+   action : (request)
+   
+ View ---will send an action(request)--where it will send(store)--for what (to execute biz logic) -Why(to get model(data).
+
+
+Sending Request 
+
+  View---->action----->store--->|state(model)
+			      Bizlogic
+			       
+  View---->dispatcher--->action----->store--->|state( model)
+			                       Bizlogic
+
+Getting Response(result)
+
+
+inital Render
+
+		 		View is re-rendered
+				 	|     
+				  View is notified
+				       |	
+				   Emit signal(event):when the result is ready
+				       |
+               action-->dispatcher--->store--->|state( model)
+			               |     Bizlogic ---executes --mutates data
+				       |		|
+					return result to the store
+
+
+
+user/program initated action
+				
+				 View is re-rendered
+				 	|     
+				  View is notified
+				       |	
+				   Emit signal(event):when the result is ready
+				       |
+ View---->dispatcher--->action----->store--->|state( model)
+			               |     Bizlogic ---executes --mutates data
+				       |		|
+					return result to the store
+
+
+Objective : 
+
+1.no state changes by view.
+2.if you want to change the state, send request to store,where only state change happens
+3.store keep tracks(history of state changes) ; time travel.
+4.no original state is mutated : uses pure functions.
+
+In web :
+ View--http--request--transporter(http)-----webserver--biz logic--state
+ transporter ===dispatcher
+//////////////////////////////////////////////////////////////////////////////////////
+
+Implementation of flux design pattern:
+
+1.face book developed a lib called "flux.js" along with ui lib called "react.js"
+
+after some year, one of react developer from UK dan abramov who started simplifying "flux.js"
+
+who created a lib called "redux".
+
+Redux is just "reference implementation of Flux and reducer concept".
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Redux keywords:
+
+store; the place model(state) is stored.
+
+reducer: the function we call pure function, having biz logic and state declartion
+
+action : request to store
+
+dispatcher ; it is transporter , responsible for triggering work flow.
+
+action creatores
+
+middlewares
+
+
+Redux core principles:
+......................
+
+1.single source of truth:
+  "The global state of your application is stored in an object tree within a stingle store"
+
+Store looks like a small db. where the whole app data is stored.
+
+How store stores data? 
+   In a sinlgle literal object.
+
+let appState =  {
+
+ //application data
+
+}
+
+2.state is read only
+
+ You cant change the state directly on store , rather you have to send action,function is called(biz logic - reducer),updates store.
+
+3.changes are maded with pure functions
+
+  if you change state, dont mutate, rather than , return new object : pure function
+
+pure functions are other wise called as "reducer"
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Once if you introduce redux, the whole state will be moved from react to redux..
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Lets code:
+
+redux:
+
+npm i redux --save
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Redux core concepts:
+
+1.redux state,actions....
+
+2.react-redux...
+
+3.middlewares
+
+4.saga
+
+
+Redux apis;- import { createStore } from 'redux';
+
+
+1. Store createStore(reducer) ; 
+
+   it is factory api to create Store object.
+
+
+2.Store Object methods
+ getState()
+ dispatch(action)
+ subscribe(listener)
+ replaceReducer(nextReducer)
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Action and dipatcher:
+...................
+
+
+Redux work flow:
+
+			         View is re-rendered
+				 	|     
+				  View is notified
+				       |	
+				   Emit signal(event):when the result is ready
+				       |
+ View---->dispatcher--->action----->store--->|state( model)
+			               |     Bizlogic ---executes --mutates data
+				       |		|
+					return result to the store
+
+
+
+dispatcher:
+
+ In redux dispacther (dispatch) is method of store Object
+
+dispatch method will start work flow 
+
+dispatch method will take request(action) as parameter,
+
+           where action describes "what to do - biz logic information like add,update.."
+
+what is action ?
+
+action is simple literal object.
+according to flux pattern , every action must  have key property called
+type which describes the biz logic
+
+while sending action, it may pass input. - optional
+
+const action = { 
+  type:'ADD'
+}
+
+
+   			         View is re-rendered
+				 	|     
+				   subscribe method
+				       |	
+				   Emit signal(event):when the result is ready
+				       |
+ View-->store.dispatch(action)--->-->store--->| reducer(state,action)--invoked--return new 								state
+				       |		|
+					return result to the store
+
+
+
+
+import { createStore } from 'redux';
+
+
+//reducer function : holds biz logic 
+/**
+ * pure function, which changes the state,
+ * Should return always immutable data structure
+ * which is eq to setState method in react
+ * 
+ * Reducer syntax;
+ *  1.reducer function must take two args
+ *     1.inital state value
+ *           in react state must be always object
+ *           here state can be even prmimitive also ,must be initalized to some value
+ *     2.action information
+ *          action is object , containing information about request
+ *  
+ * 2.function body 
+ *    will have biz logics like add,remove,update
+ *    must return state , including default state
+ *  
+ */
+function CounterReducer(state = 0, action) {
+
+    switch (action.type) {
+        case 'INCREMENT':
+            //return new state
+            return state + 1;
+        default:
+            //must return default state
+            return state;
+    }
+
+}
+
+
+//create Store Object
+const appStore = createStore(CounterReducer)
+
+//calling store methods
+appStore.subscribe(function () {
+    //get the new state
+    console.log(appStore.getState());
+});
+
+const incrementAction = {
+    type: 'INCREMENT'
+}
+
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+
+
+////////////////////////////////////////////////////////////////////////////////////
+
+code refeactoring:
+
+1.actions name : should not hard coded, instead you should create action constants
+
+2.as much as possible, must be isloated.
+
+
+
+import { createStore } from 'redux';
+import { INCREMENT } from './actionconstants';
+
+//actions
+export const incrementAction = {
+    type: INCREMENT
+}
+
+//arrow functions
+export const CounterReducer = (state = 0, { type }) => {
+    switch (type) {
+        case INCREMENT:
+            //return new state
+            return state + 1;
+        default:
+            //must return default state
+            return state;
+    }
+}
+
+
+//create Store Object
+const appStore = createStore(CounterReducer)
+
+//calling store methods
+appStore.subscribe(() => {
+    //get the new state
+    console.log(appStore.getState());
+});
+
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+//pass action object directly
+appStore.dispatch({ type: INCREMENT });
+//////////////////////////////////////////////////////////////////////////////////////////
+
+How to add more biz apis?
+
+import { createStore } from 'redux';
+import { INCREMENT, DECREMENT } from './actionconstants';
+
+//actions
+export const incrementAction = {
+    type: INCREMENT
+}
+export const decrementAction = {
+    type: DECREMENT
+}
+//arrow functions
+export const CounterReducer = (state = 0, { type }) => {
+    switch (type) {
+        case INCREMENT:
+            //return new state
+            return state + 1;
+        case DECREMENT:
+            //return new state
+            return state - 1;
+        default:
+            //must return default state
+            return state;
+    }
+}
+
+
+//create Store Object
+const appStore = createStore(CounterReducer)
+
+//calling store methods
+appStore.subscribe(() => {
+    //get the new state
+    console.log(appStore.getState());
+});
+
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+//pass action object directly
+appStore.dispatch({ type: INCREMENT });
+appStore.dispatch(decrementAction)
+appStore.dispatch(decrementAction)
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+what if the state literal object ? use always : immutablity logic
+
+
+import { createStore } from 'redux';
+import { INCREMENT, DECREMENT } from './actionconstants';
+
+//actions
+export const incrementAction = {
+    type: INCREMENT
+}
+export const decrementAction = {
+    type: DECREMENT
+}
+//arrow functions
+const initalState = {
+    counter: 10
+}
+export const CounterReducer = (state = initalState, { type }) => {
+    switch (type) {
+        case INCREMENT:
+            //return new state
+            let counter = state.counter + 1;
+            // return Object.assign({}, state, { counter })
+            return { ...state, counter };
+        case DECREMENT:
+            //return new state
+            let deccounter = state.counter - 1;
+            return Object.assign({}, state, { counter: deccounter })
+        default:
+            //must return default state
+            return state;
+    }
+}
+
+
+//create Store Object
+const appStore = createStore(CounterReducer)
+
+//calling store methods
+appStore.subscribe(() => {
+    //get the new state
+    console.log(appStore.getState());
+});
+
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+//pass action object directly
+appStore.dispatch({ type: INCREMENT });
+appStore.dispatch(decrementAction)
+appStore.dispatch(decrementAction)
+
 
 
 
