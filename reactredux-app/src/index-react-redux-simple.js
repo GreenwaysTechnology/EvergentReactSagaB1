@@ -27,19 +27,6 @@ function mapStateToProp(state) {
         counter: state
     }
 }
-//dispatch mapper : function as prop
-function mapDispatchToProp(dispatch) {
-    //return configuration object : key :value
-    //key is going to be react propery : function as prop
-    //value is going to be function
-    return {
-        onIncrement: function () {
-            dispatch({ type: INCREMENT })
-        }
-    }
-
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 //Step 3: Declare React component
 
@@ -49,19 +36,22 @@ const IncrementContainerComponent = props => {
 
 //presentational components
 const IncrementDisplay = props => {
-    const { counter, onIncrement } = props;
+    const { counter, dispatch } = props;
+    //event listener
+    const onIncrement = e => {
+        //dispatch an action to increment value
+        dispatch({ type: INCREMENT })
+    }
     return <div>
         <h1>React - Redux - Counter App</h1>
         <h2>Increment : {counter}</h2>
-        <button onClick={() => {
-            onIncrement()
-        }}>Increment</button>
+        <button onClick={onIncrement}>Increment</button>
     </div>
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 //step 4 : create high order component ; Container Component
-const IncrementHOC = connect(mapStateToProp, mapDispatchToProp)(IncrementContainerComponent);
+const IncrementHOC = connect(mapStateToProp)(IncrementContainerComponent);
 //////////////////////////////////////////////////////////////////////////
 
 //Step 5 : Component rendering

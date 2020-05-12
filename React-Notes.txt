@@ -4229,6 +4229,612 @@ appStore.dispatch({ type: INCREMENT });
 appStore.dispatch(decrementAction)
 appStore.dispatch(decrementAction)
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+How to send input to the biz logic(reducer)
+
+The default action is "@@redux/INITw.a.9.0.v.p" which is called by redux, in order to initalize the default state.
+
+
+Action creators:
+
+just  a function, which returns an action object and takes input as parameter
+
+//sending input to the reducer
+import { createStore } from 'redux';
+
+//actions constants
+export const UPDATEPROFILE = 'UPDATEPROFILE'
+
+//reducer
+const initalState = {
+    id: 1,
+    name: 'Subramanian',
+    city: 'Coimbatore'
+}
+export const updateProfileReducer = (state = initalState, action) => {
+
+    //log actions and inital state : previous state 
+    console.log(`action and previous state`)
+    console.log(action, state)
+    //action will have two things : type, input
+    const { type, city } = action;
+    switch (type) {
+        case UPDATEPROFILE:
+            return Object.assign({}, state, { city });
+        default:
+            return state;
+    }
+}
+
+//store
+const appStore = createStore(updateProfileReducer);
+
+//subscription
+appStore.subscribe(function () {
+    //current state
+    console.log(`Current state`)
+    console.log(appStore.getState());
+})
+//start dispacthing
+//sending input, which is hardcoded
+appStore.dispatch({ type: UPDATEPROFILE, city: 'Chennai' })
+
+//what if i want to pass input  which is user input.
+
+//action creators
+// function updateProfileActionCreatore(city) {
+//     //retun action object
+//     return {
+//         type: UPDATEPROFILE,
+//         city: city
+//     }
+// }
+// arrow version
+const updateProfileActionCreatore = city => ({
+    type: UPDATEPROFILE,
+    city
+});
+
+appStore.dispatch(updateProfileActionCreatore('Pune'));
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Redux app modularity:
+.....................
+
+Application is collection of domains(product,customer,store,payment)
+
+Each domain may have some models and biz logic.
+
+Each biz logic is represented by reducers in redux app.
+
+
+          Product             Customer              Store      Payment
+           |                     |
+           state                state                ....       .......
+     ---------------         -------------
+           |                    |
+       ProductReducer         CustomerReducer
+
+
+Where this state stored?
+
+  Redux maintains a database called "app state" :  the redux stores all application data(state) into only one single object.
+
+what is the structure of app state?
+
+const appState= { 
+
+  reducer: {
+      state
+  },
+  reducer :{
+     state
+  },
+
+}
+
+const appState= { 
+
+  productreducer: {
+      state : {
+        id:1,
+        name:'default'
+      }
+  },
+  customerreducer :{
+     state :{
+        id:1,
+        name:'default'
+      }
+  },
+
+}
+
+How to read state?
+  store.getState() => entire state =>  { 
+
+  productreducer: {
+      state : {
+        id:1,
+        name:'default'
+      }
+  },
+  customerreducer :{
+     state :{
+        id:1,
+        name:'default'
+      }
+  },
+
+             "We have only one Store, which stores app state"
+
+
+How to pass more reducers to createStore Function?
+..................................................
+
+
+
+         Product             Customer              Store      Payment
+           |                     |
+           state                state                ....       .......
+     ---------------         -------------
+           |                    |
+       ProductReducer         CustomerReducer
+	   |                         |                |           |
+     -----------------------------------------------------------------------	
+
+  const  config =  {
+     ProductReducer:ProdutReducer,
+     CustomerReducer:CustomerReducer
+  }
+																								
+Redux composit
+function             const rootReducer = combineReducers(config)
+			  
+                      appStore =createStore(rootReducer)
+
+
+///multi reducer;
+//sending input to the reducer
+import { createStore, combineReducers } from 'redux';
+import { INCREMENT, DECREMENT } from './actionconstants';
+
+
+//actions constants profile
+export const UPDATEPROFILE = 'UPDATEPROFILE'
+//counters
+export const incrementAction = {
+    type: INCREMENT
+}
+export const decrementAction = {
+    type: DECREMENT
+}
+
+export const CounterReducer = (state = {
+    counter: 10
+}, { type }) => {
+    switch (type) {
+        case INCREMENT:
+            //return new state
+            let counter = state.counter + 1;
+            // return Object.assign({}, state, { counter })
+            return { ...state, counter };
+        case DECREMENT:
+            //return new state
+            let deccounter = state.counter - 1;
+            return Object.assign({}, state, { counter: deccounter })
+        default:
+            //must return default state
+            return state;
+    }
+}
+
+
+
+//reducer
+const initalState = {
+    id: 1,
+    name: 'Subramanian',
+    city: 'Coimbatore'
+}
+export const updateProfileReducer = (state = initalState, action) => {
+    const { type, city } = action;
+    switch (type) {
+        case UPDATEPROFILE:
+            return Object.assign({}, state, { city });
+        default:
+            return state;
+    }
+}
+
+// const reducerConfig = {
+//     CounterReducer: CounterReducer,
+//     updateProfileReducer: updateProfileReducer
+// }
+const reducerConfig = {
+    CounterReducer,
+    updateProfileReducer
+}
+const rootReducer = combineReducers(reducerConfig)
+//store
+const appStore = createStore(rootReducer);
+
+//subscription
+appStore.subscribe(function () {
+    //current state
+    console.log(`Current state`)
+    //console.log(appStore.getState());
+    const { CounterReducer, updateProfileReducer } = appStore.getState()
+    console.log(updateProfileReducer,CounterReducer)
+})
+
+appStore.dispatch({ type: UPDATEPROFILE, city: 'Chennai' })
+
+const updateProfileActionCreatore = city => ({
+    type: UPDATEPROFILE,
+    city
+});
+
+appStore.dispatch(updateProfileActionCreatore('Pune'));
+appStore.dispatch({ type: INCREMENT });
+appStore.dispatch(decrementAction)
+////////////////////////////////////////////////////////////////////////////////////////////
+                            React - Redux Integration
+
+
+Challenges:
+
+1.How to subscribe the state into React component
+2.As a developer, how to isloate state component specific.
+
+How to abstract react and redux work flows?
+
+ we have lib called "react-redux" 
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Lets code:
+
+Steps:
+
+0.install react-redux lib.
+
+>npm i react-redux --save
+
+1.Redux : reducer,store,actions
+
+//step 1 : Redux , Reducer,store actions
+const incrementReducer = (state = 0, action) => {
+    const { type } = action;
+    switch (type) {
+        case INCREMENT:
+            return state + 1
+        default:
+            return state;
+    }
+};
+//store
+const store = createStore(incrementReducer);
+
+2.State Mapper:
+   In react data can be supplied as a prop to component.
+   Already we have seen in react "state" as a prop : dynamic props.
+
+ In redux : the same react state is represented inside reducer as state.
+
+now we need to send that state as prop to React Component.
+  
+         "Reducer state as  a prop to React Component"
+
+How to get Reducer state as prop ?
+   "With help of mapper function".
+
+How to write mapper function, who will call that function/
+
+   react-redux lib will call .
+
+//step 2 : state mapper function
+//state is arg: redux whole state (getState())
+function mapStateToProp(state) {
+    //return configuration object : key : value
+    //key is going to be react prop
+    //value is going to be redux state
+    return {
+        counter: state
+    }
+}
+
+3.React side
+//Step 3: Declare React component
+function IncrementComponent(props) {
+    //event listener
+    function onIncrement(e) {
+        //TODO
+    }
+    return <div>
+        <h1>React - Redux - Counter App</h1>
+        <h2>Increment : {props.counter}</h2>
+    </div>
+}
+
+4.Bind React component with Redux why , then only the Component can dispatch an action
+  and can get new State as prop.
+
+HOC : Higher order Component;
+      
+  Adding features from the existing objects  = decorator design pattern
+
+  React Component  + redux mapper function ====>New React Component having redux features
+
+how to create hoc?
+ "connect" function
+
+const IncrementContainer = connect(mapStateToProp)(IncrementComponent);
+
+
+Step : Rendering HOC.
+
+react-redux provides "shared component" -Context Object ---<Provider>
+   - to share /pass "store Object" into application.
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+//react-redux integration
+import { createStore, coimbineReducers } from 'redux';
+import React from 'react';
+import { render } from 'react-dom';
+import { Provider, connect } from 'react-redux';
+import { INCREMENT, DECREMENT } from './actionconstants';
+//step 1 : Redux , Reducer,store actions
+const incrementReducer = (state = 10, action) => {
+    const { type } = action;
+    switch (type) {
+        case INCREMENT:
+            return state + 1
+        default:
+            return state;
+    }
+};
+//store
+const appStore = createStore(incrementReducer);
+/////////////////////////////////////////////////////////////////////////////////
+//step 2 : state mapper function
+//state is arg: redux whole state (getState())
+function mapStateToProp(state) {
+    //return configuration object : key : value
+    //key is going to be react prop
+    //value is going to be redux state
+    return {
+        counter: state
+    }
+}
+////////////////////////////////////////////////////////////////////////////////
+//Step 3: Declare React component
+const IncrementComponent = props => {
+    const { counter, dispatch } = props;
+    //event listener
+    const onIncrement = e => {
+        //dispatch an action to increment value
+        dispatch({ type: INCREMENT })
+    }
+    return <div>
+        <h1>React - Redux - Counter App</h1>
+        <h2>Increment : {counter}</h2>
+        <button onClick={onIncrement}>Increment</button>
+    </div>
+}
+/////////////////////////////////////////////////////////////////////////////////
+//step 4 : create high order component ; Container Component
+const IncrementHOC = connect(mapStateToProp)(IncrementComponent);
+//////////////////////////////////////////////////////////////////////////
+
+//Step 5 : Component rendering
+
+const App = () => <>
+    <Provider store={appStore}>
+        <IncrementHOC/>
+    </Provider>
+</>
+
+render(<App />, document.getElementById('root'));
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+React and Redux app arch:
+..........................
+
+         Product             Customer              Store      Payment
+           |                     |
+          state                state                ....       .......
+     ---------------         -------------
+           |                    |
+       ProductReducer         CustomerReducer
+	   |                         |                |           |
+     -------------------------------------------------------------------------------------	
+	   |			      |		
+				     Store
+			
+     ----------------------------------------------------------------------------------------
+				  React-Redux
+           |				|
+	------------------------------------------------------------------------------------
+        |                         |                      |              |
+     ProductContainer          CustomerContainer     StoreContainer  PaymentContainer
+         |
+    ProductSubContainer
+          |
+  ---------------------
+  |     |      |    |
+  Product Presentational
+       Components
+         |
+   Projection of Views
+
+
+What is the role of containers?
+  
+  To talk to Redux.
+
+
+
+//react-redux integration
+import { createStore, coimbineReducers } from 'redux';
+import React from 'react';
+import { render } from 'react-dom';
+import { Provider, connect } from 'react-redux';
+import { INCREMENT, DECREMENT } from './actionconstants';
+//step 1 : Redux , Reducer,store actions
+const incrementReducer = (state = 10, action) => {
+    const { type } = action;
+    switch (type) {
+        case INCREMENT:
+            return state + 1
+        default:
+            return state;
+    }
+};
+//store
+const appStore = createStore(incrementReducer);
+/////////////////////////////////////////////////////////////////////////////////
+//step 2 : state mapper function
+//state is arg: redux whole state (getState())
+function mapStateToProp(state) {
+    //return configuration object : key : value
+    //key is going to be react prop
+    //value is going to be redux state
+    return {
+        counter: state
+    }
+}
+////////////////////////////////////////////////////////////////////////////////
+//Step 3: Declare React component
+
+const IncrementContainerComponent = props => {
+    return <IncrementDisplay {...props} />
+}
+
+//presentational components
+const IncrementDisplay = props => {
+    const { counter, dispatch } = props;
+    //event listener
+    const onIncrement = e => {
+        //dispatch an action to increment value
+        dispatch({ type: INCREMENT })
+    }
+    return <div>
+        <h1>React - Redux - Counter App</h1>
+        <h2>Increment : {counter}</h2>
+        <button onClick={onIncrement}>Increment</button>
+    </div>
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+//step 4 : create high order component ; Container Component
+const IncrementHOC = connect(mapStateToProp)(IncrementContainerComponent);
+//////////////////////////////////////////////////////////////////////////
+
+//Step 5 : Component rendering
+
+const App = () => <>
+    <Provider store={appStore}>
+        <IncrementHOC />
+    </Provider>
+</>
+
+render(<App />, document.getElementById('root'));
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+How to even eleminate store dispatch function calls inside component?
+
+//step 2 : dispatch mapper
+
+//react-redux integration
+import { createStore, coimbineReducers } from 'redux';
+import React from 'react';
+import { render } from 'react-dom';
+import { Provider, connect } from 'react-redux';
+import { INCREMENT, DECREMENT } from './actionconstants';
+//step 1 : Redux , Reducer,store actions
+const incrementReducer = (state = 10, action) => {
+    const { type } = action;
+    switch (type) {
+        case INCREMENT:
+            return state + 1
+        default:
+            return state;
+    }
+};
+//store
+const appStore = createStore(incrementReducer);
+/////////////////////////////////////////////////////////////////////////////////
+//step 2 : state mapper function
+//state is arg: redux whole state (getState())
+function mapStateToProp(state) {
+    //return configuration object : key : value
+    //key is going to be react prop
+    //value is going to be redux state
+    return {
+        counter: state
+    }
+}
+//dispatch mapper : function as prop
+function mapDispatchToProp(dispatch) {
+    //return configuration object : key :value
+    //key is going to be react propery : function as prop
+    //value is going to be function
+    return {
+        onIncrement: function () {
+            dispatch({ type: INCREMENT })
+        }
+    }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//Step 3: Declare React component
+
+const IncrementContainerComponent = props => {
+    return <IncrementDisplay {...props} />
+}
+
+//presentational components
+const IncrementDisplay = props => {
+    const { counter, onIncrement } = props;
+    return <div>
+        <h1>React - Redux - Counter App</h1>
+        <h2>Increment : {counter}</h2>
+        <button onClick={() => {
+            onIncrement()
+        }}>Increment</button>
+    </div>
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+//step 4 : create high order component ; Container Component
+const IncrementHOC = connect(mapStateToProp, mapDispatchToProp)(IncrementContainerComponent);
+//////////////////////////////////////////////////////////////////////////
+
+//Step 5 : Component rendering
+
+const App = () => <>
+    <Provider store={appStore}>
+        <IncrementHOC />
+    </Provider>
+</>
+
+render(<App />, document.getElementById('root'));
+////////////////////////////////////////////////////////////////////////////////////////////
+
+//Multi Reducers 
+
+//Middle wares : saga
+*********************************************************************************************
+
+
+
+
+
 
 
 
