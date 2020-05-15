@@ -1,0 +1,301 @@
+
+Saga Work Flow:
+
+                                          |
+View ---store.dispatch() ---StorSaga Engine---|--Entry--->dispatch action to Store
+                                          |
+
+
+							  take('start')-listens
+Client----store.dispatch({type:'start'})-----RootSaga ---|wait for some time
+							  put({type:'DONE'}) -dispatch
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+eg:
+//saga setup
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, takeLatest, takeEvery, take, delay } from 'redux-saga/effects'
+
+const sagaMiddleware = createSagaMiddleware();
+//
+const MyReducer = (state = 'DONE JOB', action) => {
+    //console.log(action, state)
+    switch (action.type) {
+        case 'DONE':
+            return 'DONE COMPLETED JOB'
+        default:
+            return state;
+    }
+}
+const store = createStore(MyReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log('state', store.getState());
+});
+
+//create root saga /entry saga to kick start
+function* rootSaga() {
+
+    //listens for action from view/outside
+    yield take('START');
+    //dispatch action to store
+    yield put({ type: 'DONE' })
+
+}
+sagaMiddleware.run(rootSaga)
+
+//dispatch action to Saga Engine
+store.dispatch({ type: 'START' })
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+RootSaga - spawns new task(worker saga)
+.......................................
+takeEvery
+    takeEvery allows concurrent actions to be handled.
+
+function* fetchUser(action) {
+  ...
+}
+
+function* watchFetchUser() {
+  yield takeEvery('USER_REQUESTED', fetchUser)
+}
+
+In the example above, when a USER_REQUESTED action is dispatched, a new fetchUser task is started even if a previous fetchUser is still pending (for example, the user clicks on a Load User button 2 consecutive times at a rapid rate, the 2nd click will dispatch a USER_REQUESTED action while the fetchUser fired on the first one hasn't yet terminated).
+
+takeEvery doesn't handle out of order responses from tasks. There is no guarantee that the tasks will terminate in the same order they were started. To handle out of order responses, you may consider takeLatest below.
+
+
+//saga setup
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, takeLatest, takeEvery, take, delay, takeMaybe } from 'redux-saga/effects'
+
+const sagaMiddleware = createSagaMiddleware();
+const INCREMENT = 'INCREMENT'
+//
+const MyReducer = (state = 0, action) => {
+    //console.log(action, state)
+    switch (action.type) {
+        case INCREMENT:
+            return state + 1;
+        default:
+            return state;
+    }
+}
+const store = createStore(MyReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log('state', store.getState());
+});
+
+function* workerSaga(action) {
+    yield put({ type: INCREMENT })
+}
+
+//create root saga /entry saga to kick start
+function* rootSaga() {
+    yield takeEvery('START', workerSaga)
+
+}
+sagaMiddleware.run(rootSaga)
+
+//dispatch action to Saga Engine
+store.dispatch({ type: 'START' })
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Sending Multiple Request;
+import { createStore, applyMiddleware } from 'redux'
+import createSagaMiddleware from 'redux-saga'
+import { put, takeLatest, delay } from 'redux-saga/effects'
+
+const reducer = (state = 'default', { message, type }) => {
+    switch (type) {
+        case 'HELLO':
+            return message;
+
+        case 'HAI':
+            return message;
+
+        default:
+            return state;
+    }
+}
+
+function* hello() {
+    yield delay(5000) // pause this for 5000ms then dispatch
+    yield put({ type: 'HELLO', message: 'hello' })
+
+}
+function* hai() {
+    yield delay(3000) // pause this for 3000ms then dispatch
+
+    yield put({ type: 'HAI', message: 'hai' })
+}
+function* root() {
+    yield takeLatest('SAYHELLO', hello);
+    yield takeLatest('SAYHAI', hai);
+}
+const sagaMiddleWare = createSagaMiddleware();
+const store = createStore(reducer, applyMiddleware(sagaMiddleWare))
+
+sagaMiddleWare.run(root);
+
+store.subscribe(() => {
+    console.log(store.getState());
+})
+
+
+store.dispatch({ type: 'SAYHELLO' });
+store.dispatch({ type: 'SAYHAI' });
+
+
+///saga setup
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, takeLatest, takeEvery,take } from 'redux-saga/effects'
+
+const sagaMiddleware = createSagaMiddleware();
+
+const INCREMENT = 'INCREMENT'
+const DECREMENT = 'DECREMENT'
+//
+const CounterReducer = (state = 0, action) => {
+    //console.log(state, action);
+    switch (action.type) {
+        case INCREMENT:
+            return state + 1;
+        case DECREMENT:
+            return state - 1;
+        default:
+            return state;
+    }
+}
+const store = createStore(CounterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log('counter',store.getState());
+});
+
+//worker sagas to dispatch logics
+
+function* incrementworker() {
+    yield put({ type: INCREMENT })
+}
+function* decrementworker() {
+    yield put({ type: DECREMENT })
+}
+
+
+
+//create root saga /entry saga to kick start
+function* rootSaga() {
+    console.log('saga - init')
+    //spawn workers
+    yield takeEvery('inc', incrementworker)
+   // yield take('dec', decrementworker)
+
+}
+sagaMiddleware.run(rootSaga)
+
+//store.dispatch({ type: 'inc' })
+//store.dispatch({ type: 'inc' })
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+Promises:
+
+import { createStore, applyMiddleware } from 'redux'
+import createSagaMiddleware from 'redux-saga'
+import { put, takeLatest, delay, call } from 'redux-saga/effects'
+
+function getUser() {
+    let user = {
+        id: 1,
+        name: 'Subramanian'
+    }
+    return new Promise((resolve, reject) => {
+        if (user) {
+            setTimeout(resolve, 1000, user);
+        } else {
+            setTimeout(reject, 1000, { code: 500, message: 'User not found!!' })
+        }
+    })
+}
+
+    const GETUSER = 'GETUSER'
+
+
+    const reducer = (state = null, action) => {
+        switch (action.type) {
+            case 'FETCHUSERSUCCESS':
+                const { id, name } = action.user;
+                return { ...state, id, name }
+            case 'FETCHUSERFAILED':
+                return Object.assign({}, state, { err: action.error })
+
+            default:
+                return state;
+        }
+    }
+
+    function* fetchUser() {
+        try {
+            const user = yield call(getUser)
+            yield put({ type: 'FETCHUSERSUCCESS', user })
+            console.log(user);
+        }
+        catch (error) {
+            yield put({ type: 'FETCHUSERFAILED', error })
+        }
+
+    }
+
+    function* root() {
+        yield takeLatest('FETCHUSER', fetchUser);
+    }
+    const sagaMiddleWare = createSagaMiddleware();
+    const store = createStore(reducer, applyMiddleware(sagaMiddleWare))
+    sagaMiddleWare.run(root);
+
+    store.subscribe(() => {
+        console.log(store.getState());
+    })
+
+
+    store.dispatch({ type: 'FETCHUSER' });
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+worker saga to start action dispactch
+
+effect creatrors
+
+take
+  maybe
+  latest	
+  Every
+  Leading
+put
+
+call
+apply
+fork
+spawn
+join
+cancel
+delay
+debounce
+retry

@@ -1,75 +1,102 @@
-//react-redux integration
-import { createStore, coimbineReducers } from 'redux';
-import React from 'react';
-import { render } from 'react-dom';
-import { Provider, connect } from 'react-redux';
-import { INCREMENT, DECREMENT } from './actionconstants';
-//step 1 : Redux , Reducer,store actions
-const incrementReducer = (state = 10, action) => {
-    const { type } = action;
-    switch (type) {
-        case INCREMENT:
-            return state + 1
-        default:
-            return state;
-    }
-};
-//store
-const appStore = createStore(incrementReducer);
-/////////////////////////////////////////////////////////////////////////////////
-//step 2 : state mapper function
-//state is arg: redux whole state (getState())
-function mapStateToProp(state) {
-    //return configuration object : key : value
-    //key is going to be react prop
-    //value is going to be redux state
-    return {
-        counter: state
-    }
-}
-//dispatch mapper : function as prop
-function mapDispatchToProp(dispatch) {
-    //return configuration object : key :value
-    //key is going to be react propery : function as prop
-    //value is going to be function
-    return {
-        onIncrement: function () {
-            dispatch({ type: INCREMENT })
+    import { createStore, applyMiddleware } from 'redux';
+    import createSagaMiddleware from 'redux-saga';
+    import { put, all,call, take, takeLatest, takeEvery, select } from 'redux-saga/effects'
+
+
+    //create saga middleware
+    const sagaMiddleware = createSagaMiddleware();
+
+    //reducer
+    const GreeterReducer = (message = 'greet', action) => {
+        switch (action.type) {
+            case 'HELLO':
+                return action.message
+            case 'HAI':
+                return action.message
+            case 'SHOW_CONGRATULATION':
+                return 'You won I phone!!!!..Cheers'
+            default:
+                return message;
         }
     }
+    const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
 
-}
+    store.subscribe(function () {
+        console.log(store.getState());
+    })
 
-////////////////////////////////////////////////////////////////////////////////
-//Step 3: Declare React component
+    //wath and Log each action and observe state : Logger.
 
-const IncrementContainerComponent = props => {
-    return <IncrementDisplay {...props} />
-}
+    function* watchAndLog() {
+        //watch all actions, each request grab its action and state
+        yield takeEvery('*', function* (action) {
+            //state : select effect get the current store state
+            const state = yield select();
+            console.log('action', action);
+            console.log('state', state);
+        })
+        //conditional listening : 
+        /**
+         * if an action called 'HAIREQUEST' is coming three times to the application
+         *  // you can watch conditionally.
+         */
+        //using loop
+        for (let i = 0; i < 3; i++) {
+            yield take('HAIREQUEST');
+        }
+        yield put({ type: 'SHOW_CONGRATULATION' })
 
-//presentational components
-const IncrementDisplay = props => {
-    const { counter, onIncrement } = props;
-    return <div>
-        <h1>React - Redux - Counter App</h1>
-        <h2>Increment : {counter}</h2>
-        <button onClick={() => {
-            onIncrement()
-        }}>Increment</button>
-    </div>
-}
+    }
 
-/////////////////////////////////////////////////////////////////////////////////
-//step 4 : create high order component ; Container Component
-const IncrementHOC = connect(mapStateToProp, mapDispatchToProp)(IncrementContainerComponent);
-//////////////////////////////////////////////////////////////////////////
 
-//Step 5 : Component rendering
+    //worker saga : FOR HELLO ACTION
+    //spins a separate thread
+    function* helloSaga() {
+        //dispatch an action to the store
+        yield put({ type: 'HELLO', message: 'hello world' })
+    }
 
-const App = () => <>
-    <Provider store={appStore}>
-        <IncrementHOC />
-    </Provider>
-</>
+    function* haiSaga() {
+        //dispatch an action to the store
+        yield put({ type: 'HAI', message: 'hai' })
+    }
 
-render(<App />, document.getElementById('root'));
+    function* haiModule() {
+        yield takeLatest('HAIREQUEST', haiSaga);
+    }
+
+    function* helloModule() {
+        yield takeLatest('HELLOREQUEST', helloSaga);
+
+    }
+    //concurrent api calls and grab results together.
+    function fetchData(url) {
+        return fetch(url).then(res => res.json());
+    }
+    function* fetchUsersAndComments() {
+        const commentsUrl = 'https://jsonplaceholder.typicode.com/comments'
+        const usersUrl = 'https://jsonplaceholder.typicode.com/users';
+        const [comments, users] = yield all([
+            call(fetchData, commentsUrl),
+            call(fetchData, usersUrl)
+        ]);
+        console.log(comments);
+        console.log(users);
+    }
+
+
+    //root saga/ main
+    function* main() {
+        yield all([fetchUsersAndComments(),watchAndLog(), haiModule(), helloModule()]);
+    }
+    //will kick start saga engine.
+    sagaMiddleware.run(main);
+
+    //start sending HELLOREQUEST
+    //store.dispatch({ type: 'HELLOREQUEST' })
+    store.dispatch({ type: 'HAIREQUEST' })
+    store.dispatch({ type: 'HAIREQUEST' })
+    store.dispatch({ type: 'HAIREQUEST' })
+
+
+

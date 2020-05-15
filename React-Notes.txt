@@ -4828,8 +4828,1680 @@ render(<App />, document.getElementById('root'));
 
 //Multi Reducers 
 
-//Middle wares : saga
-*********************************************************************************************
+
+               
+        Product             Customer              Store      Payment
+           |                     |
+          state                state                ....       .......
+     ---------------         -------------
+           |                    |
+       ProductReducer         CustomerReducer
+	   |                         |                |            |
+      mapStateToProp           mapStateToProp      mapStateToProp mapStateToProp
+        (state)                   (state)           (state)        (state)
+         {reducer:{}}
+
+           |                        |                 |             |
+    -------------------------------------------------------------------------------------	
+	   |			      |		
+				     Store
+			
+     ----------------------------------------------------------------------------------------
+				  React-Redux
+           |				|
+	------------------------------------------------------------------------------------
+        |                         |                      |              |
+     ProductContainer          CustomerContainer     StoreContainer  PaymentContainer
+         |
+    ProductSubContainer
+          |
+  ---------------------
+  |     |      |    |
+  Product Presentational
+       Components
+         |
+   Projection of Views
+
+
+//react-redux integration
+import { createStore, combineReducers } from 'redux';
+import React from 'react';
+import { render } from 'react-dom';
+import { Provider, connect } from 'react-redux';
+import { INCREMENT, DECREMENT } from './actionconstants';
+
+//step 1 : Redux , Reducer,store actions
+const incrementReducer = (state = 10, action) => {
+
+    const { type } = action;
+    switch (type) {
+        case INCREMENT:
+            return state + 1
+        default:
+            return state;
+    }
+};
+
+const decrementReducer = (state = 10, action) => {
+
+    const { type } = action;
+    switch (type) {
+        case DECREMENT:
+            return state - 1
+        default:
+            return state;
+    }
+};
+
+//store
+const reducerConfig = {
+    incrementReducer,
+    decrementReducer
+}
+const rootReducers = combineReducers(reducerConfig)
+const appStore = createStore(rootReducers);
+/////////////////////////////////////////////////////////////////////////////////
+//step 2 : state mapper function
+//state is arg: redux whole state (getState())
+
+//increment mapper
+const incrementMapper = state => {
+    //store.getState() => {reducer:state}
+    console.log(state.incrementReducer);
+    let inccounter = state.incrementReducer
+    return {
+        inccounter
+    }
+}
+
+//decrement mapper
+const decrementMapper = state => {
+    console.log(state.decrementReducer);
+    let deccounter = state.decrementReducer
+    return {
+        deccounter
+    }
+
+}
+
+//dispatch mapper : function as prop
+function mapDispatchToProp(dispatch) {
+    //return configuration object : key :value
+    //key is going to be react propery : function as prop
+    //value is going to be function
+    return {
+        onIncrement: function () {
+            dispatch({ type: INCREMENT })
+        },
+        onDecrement: function () {
+            dispatch({ type: DECREMENT })
+        }
+    }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//Step 3: Declare React component
+
+const IncrementContainerComponent = props => {
+    return <CounterSubContainer {...props} />
+}
+
+const DecrementContainerComponent = props => {
+    return <CounterSubContainer {...props} />
+}
+
+//coimbine two containers and pass value to presentationals
+const CounterSubContainer = props => {
+    //console.log('counter sub container')
+    //console.log(props)
+    return <>
+        <CounterDisplay {...props}/>
+    </>
+}
+
+//presentational components
+const CounterDisplay = props => {
+
+    const { deccounter, inccounter, onIncrement,onDecrement } = props;
+    return <div>
+        <h1>React - Redux - Counter App</h1>
+        <h2>Increment : {inccounter}</h2>
+        <h2>Decrement : {deccounter}</h2>
+
+        <button onClick={() => {
+            onIncrement()
+        }}>Increment</button>
+          <button onClick={() => {
+            onDecrement()
+        }}>Decrement</button>
+    </div>
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+//step 4 : create high order component ; Container Component
+
+const IncrementHOC = connect(incrementMapper, mapDispatchToProp)(IncrementContainerComponent);
+
+const DecrementHOC = connect(decrementMapper, mapDispatchToProp)(DecrementContainerComponent);
+
+//////////////////////////////////////////////////////////////////////////
+
+//Step 5 : Component rendering
+
+const App = () => <>
+    <Provider store={appStore}>
+        <IncrementHOC />
+        <DecrementHOC />
+    </Provider>
+</>
+
+render(<App />, document.getElementById('root'));
+///////////////////////////////////////////////////////////////////////////////////////////
+
+As of now we have moved state from react redux 
+Redux manages all state information.
+
+                         Should i move all state from react redux?
+
+
+                       No!. You should not move all state from react to redux
+
+
+user event----dispatch action---store---call reducer---return new state--update store---ui
+
+Think : what code i can keep inside react and what code i can keep inside redux.
+
+                                  State
+				    |
+            -------------------------------------------------------------
+            |                                                           |
+        UI State                                                  Biz State(app state)
+
+UI State:
+
+1.show and hide
+2.collapse 
+3.enable and disable
+
+any ui specific state , "Should not be kept inside redux" : code best pratice.
+
+BIZ state
+users
+accounts
+comments
+products
+customers
+......................
+
+any biz state must be kept inside redux.
+...........................................................................................
+
+Should i use redux for every thing, can i use react itself for state mutation?
+
+ Ans : May be.
+
+React 16 best practices, redux need not be used for even biz state.
+
+Is there is any solution inside react?
+
+ Yes!-------> hooks ---useReducer
+
+useReducer hook and useState both are same but useReducer uses "flux" pattern
+
+
+
+//userReducer Hook, eleminates lot of boliler plate code in redux.
+
+import React, { useReducer } from 'react';
+import { render } from 'react-dom';
+import { INCREMENT, DECREMENT } from './actionconstants';
+
+
+
+//container component
+//reducer
+function CounterReducer(state, action) {
+    switch (action.type) {
+        case INCREMENT:
+            return state + 1;
+        case DECREMENT:
+            return state - 1;
+        default:
+            return state;
+    }
+
+}
+
+const initalState = 10;
+function CounterContainer() {
+    //reducer
+    const [counter, dispatch] = useReducer(CounterReducer, initalState)
+
+    function onIncrement() {
+        dispatch({ type: INCREMENT })
+    }
+    return <div>
+        <h1>Counter App: Redux Style of React</h1>
+        <h1>Counter {counter}</h1>
+        <button onClick={onIncrement}>INCREMENT</button>
+        <button onClick={() => {
+            dispatch({ type: DECREMENT })
+        }}>DECREMENT</button>
+
+    </div>
+}
+
+
+const App = () => {
+    return <CounterContainer />
+}
+render(<App />, document.getElementById('root'));
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Middlewares:
+...........
+
+Redux work flow;
+
+ store.dispatch-------------->Store---Will call Reducer----Reducer updates store--View is re render.
+
+ Sequential work flow
+
+
+
+
+store.dispatch-------------->Store---|||||||--Will call Reducer----Reducer updates store--View is re render.
+
+middleware is function which gets exeucted before reducer is called.
+
+Use cases of middleware in Redux:
+
+1.Making side effects:
+   running some thing which dont interpet normal work flow
+   wait for something and trigger work flow.
+
+Side effects:
+1.web service calls
+2.web socket calls
+3.timer/delayed operations..
+
+
+2.if you want to watch(loggers) every action dispatch...
+
+
+Middleware work flow:
+
+ A----->middleware 1------>middleware 2---->middleware N --- B(reducer)
+
+How to teach redux engine that i have middlewares?
+
+ "applyMiddleware" is function , will inject middlewares into work flow.
+
+
+
+How to write middleware?
+
+ it is function ,but it follows some syntax.
+
+let anyMiddlware = function(store){
+  
+   return function(next){
+
+        return function(action){
+            //middleware logic
+           return next(action)      
+        }
+
+  }
+
+}
+
+
+import { createStore, applyMiddleware } from 'redux';
+import { INCREMENT, DECREMENT } from './actionconstants';
+
+//actions
+export const incrementAction = {
+    type: INCREMENT
+}
+export const decrementAction = {
+    type: DECREMENT
+}
+//arrow functions
+export const CounterReducer = (state = 0, { type }) => {
+    switch (type) {
+        case INCREMENT:
+            //return new state
+            return state + 1;
+        case DECREMENT:
+            //return new state
+            return state - 1;
+        default:
+            //must return default state
+            return state;
+    }
+}
+
+//simple Logger Middleware : logs every action dispatch.
+const LoggerMiddleware = function (store) {
+    return function (next) {
+        return function (action) {
+            //middleware logic
+            console.info(`dispatching `, action);
+            let result = next(action);
+            console.log(`next state`, store.getState());
+            return result;
+        }
+    }
+}
+
+
+const middlewares = applyMiddleware(LoggerMiddleware)
+
+//create Store Object
+const appStore = createStore(CounterReducer, middlewares)
+
+//calling store methods
+appStore.subscribe(() => {
+    //get the new state
+    // console.log(appStore.getState());
+});
+
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+appStore.dispatch(incrementAction)
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Side effects inside middleware;
+
+ Why?
+ if you want to follow flux design pattern, always y have to follow
+
+ view---dispatch--action---store---will run biz logic--update store---rerender view
+
+ Ajax work flow
+
+ 1.inside reducer function , we dont write any ajax calls because reducer is pure function.
+ 2.role of reducer just state slicer==>return immtuable state.
+
+isloate ajax calls from reducer---->put inside ---->middlewares
+ middleares will run and get data, give that data to reducer , till getting data, while running ajax operations , redux has to pause the store to invoke reducer.
+
+							 
+                                                         |
+ view--dispatch---action-->store--(ajaxcode-middleware)- |---Reducer 
+						         |
+
+
+ In the side effects, two dispatch calls will always be there
+
+
+
+                                    will run api calls
+				        |      |
+				               |
+				        |     response is ready--store will triger
+							     new action
+                {type:FETCHUSERS}	|		    |	 
+                     |                                      |
+ view--dispatch---action-->store-- (ajaxcode-middleware)    |---Reducer--return new state
+						            |
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+How to implement?
+
+redux provides lot of thrid party libs.
+
+redux-thunk
+redux-promise
+redux-saga
+redux-observable- rxjs
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Redux-saga:
+..........
+
+What is redux-saga?
+
+ Redux-saga is going to makes application side effects.
+
+ side effects are impure function, which never returns immutable data.
+
+ impurefunction--data---feed to pure function----view .
+
+side effects : ajax,websocket,browser operations......
+
+ "A side effect is somthing that changes the application's state outside the application flow".
+
+saga : term:
+............
+saga is dervied from distributed database world which represents "a transaction / a process"
+"thread - sub process"
+
+saga in redux , which represents a process(thread).
+
+   "redux saga is a small thread responsiable for side effects"
+
+How many threads (sagas) you can run ?
+ as many as.
+
+Architure of redux-saga:
+.......................
+
+There are two classification of threads(saga).
+
+1.main thread (saga) / root saga
+   The redux-saga will start running from main process
+
+        
+2.worker thread /worker saga.
+    responsible for doing a task.
+
+
+sagas are written using es 6 generator functions.
+
+function* myfunction(){
+   yield value
+}
+
+function myfun(){
+
+
+}
+
+ myfun()----->push stack--->stack frame---method is removed from memory.
+
+ myfunction()--->push stack--->stack frame|--returns object----waiting for pulling(paused)
+                                          
+  Object is called as "iterator" object : iterator design pattern.
+             iterator.next() --->object -- containing value and done:false
+              iterator.next()---->object---
+
+
+function* stream() {
+    yield 1;
+    yield 2;
+    yield 3;
+    yield 4;
+    yield 5;
+}
+let iterator = stream();
+console.log(iterator)
+console.log(iterator.next())
+console.log(iterator.next())
+console.log(iterator.next())
+console.log(iterator.next())
+console.log(iterator.next())
+console.log(iterator.next())
+  
+
+set up :
+
+1.install redux-saga lib
+
+
+use case 1 : saga setup
+
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+//root saga/ main
+function* main() {
+    console.log('main starts')
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+sagas work flow apis: effects,Effect
+
+effects means methods in the saga world
+Effect means "Object" returned by effects api.
+
+effects are classified into two category
+
+1.blocking
+
+2.nonblocking
+
+
+use case : sending action to store
+
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put } from 'redux-saga/effects'
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+//root saga/ main
+function* main() {
+    console.log('main starts')
+    //sending request / dispatching an action
+    //put is effect (method)
+    yield put({ type: 'HELLO', message: 'Hello saga' })
+
+
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+How to send action to store in saga?
+
+Effects
+->put
+
+ Effect put(action) ==>store.dispatch({type:'HELLO'})
+
+Effect is object.
+Effect is an instruction to the saga engine to process the request
+
+effects will instruct the middleware to schedule the dispatching of an action to the store.
+
+
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put } from 'redux-saga/effects'
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+//root saga/ main
+function* main() {
+    console.log('main starts')
+    //dispatch an action to the store
+    const effectobj = yield put({ type: 'HELLO', message: 'hello world' })
+    console.log(effectobj);
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+Threading model:
+...............
+
+Blocking and Non Blocking:
+
+Blocking :
+  You have to wait until saga is yielded(processed)
+
+   eg
+
+    effect1 -call---running
+    effect2 --wait
+    effectN --wait
+
+while one effect is running th next line of code not started : Blocking
+
+Non blocking: conncurrency.
+
+    effect1 -call ----schedule in the back ground---running in the background
+    effect2 --start
+    effectN --wait
+
+
+non blocking is other wise called as concurrency.
+
+saga allows to run programs in concurrency.
+
+Task:
+
+ In concurrency, a task is like a process running the background.
+ In redux saga there can be multiple tasks running in paralle.
+
+
+Blocking apis(effects which is going wait for something):
+ 
+1.take
+2.call
+
+etc...
+non blocking apis
+
+1.put : 
+
+ will dispatch within in internal scheduler.
+
+2.fork
+
+3.cancel
+
+3.join
+
+etc...
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+take
+ take(pattern | channel)
+
+pattern : 'ACTION NAME'
+
+ It creates Effect object that instructs the middleware "to wait(block) for a specified action on the store."
+
+
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, take } from 'redux-saga/effects'
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+//root saga/ main
+function* main() {
+    console.log('main starts')
+
+    //dont start communication until the some action is dispatched
+    //block until this action is dispatched
+    yield take('HELLOREQUEST') // |||||
+    //dispatch an action to the store
+    yield put({ type: 'HELLO', message: 'hello world' })
+    console.log('main ends')
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+//start sending HELLOREQUEST
+store.dispatch({ type: 'HELLOREQUEST' })
+
+
+flow:
+
+store.dispatch({ type: 'HELLOREQUEST' }) ---->|store---||saga--->Reducer
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, take } from 'redux-saga/effects'
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+//root saga/ main
+function* main() {
+    console.log('main starts')
+
+    //dont start communication until the some action is dispatched
+    //block until this action is dispatched
+    yield take('HELLOREQUEST') // |||||
+    //dispatch an action to the store
+    yield put({ type: 'HELLO', message: 'hello world' })
+    console.log('main ends')
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+//start sending HELLOREQUEST
+store.dispatch({ type: 'HELLOREQUEST' })
+store.dispatch({ type: 'HELLOREQUEST' })
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+As of now our sagas are running in the main thread(main saga), how to isloate the code in a
+separate thread(work threads/worker saga).
+
+
+View----dispatch(action)------|store---|Saga Engine(Saga Middleware)
+					   |
+				     main thread is spinning
+					    |
+				      start /spawn new thread
+					   |
+                  ------------------------------------------------------------------
+                  |   |    |    |    |  |
+                t1    t2   t3   t4   t5 t6.....................................>
+
+what could be inside worker threads?
+  Your biz logic.
+
+What type of biz logic?
+  Side effects : async calls - ajax /websockets.....
+
+how to start worker thread?
+ 
+  fork effect
+
+start new worker saga  to dispatch 'HELLO' ACTION.
+ 
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, take, fork } from 'redux-saga/effects'
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+
+//worker saga : FOR HELLO ACTION
+//spins a separate thread
+function* helloSaga() {
+    //dispatch an action to the store
+    yield put({ type: 'HELLO', message: 'hello world' })
+}
+
+
+//root saga/ main
+function* main() {
+    console.log('main starts')
+    //dont start communication until the some action is dispatched
+    //block until this action is dispatched
+    yield take('HELLOREQUEST')
+
+    //create /fork /spawn new thread 
+    yield fork(helloSaga);
+    
+    console.log('main ends')
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+//start sending HELLOREQUEST
+store.dispatch({ type: 'HELLOREQUEST' })
+store.dispatch({ type: 'HELLOREQUEST' })
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+                     "wait for an action, spin a new thread"
+
+ take(pattern) + fork(workerlogic)
+
+
+Redux saga provides one more api which is having extra feature.
+ 
+  takeEvery
+  takeLatest
+  takeMaybe
+
+takeEvery ==>abstract take + fork + encapsulated inside demaon
+takeLatest ===>abstract take + fork +cancel + encapsulated demaon.
+
+
+multi request
+
+in one sec , many request
+
+---r1                                            t1
+---r2                                            t2
+---r3 ----------store----saga ---takeEvery ---|  t3  -----at same time which will update store
+---r4                                            t4
+---r5                                            t5
+
+what if i want to cancel all previous reqs,send only last/latest request
+
+
+---r1                                            t1-p
+---r2                                            t2-p
+---r3 -------store----saga ---takeLastest ---| t3-p  -----at same time which will update store
+---r4                                            t4-p
+---r5                                            t5-running
+
+cancels previous pending request.
+
+
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, take, fork, takeEvery,takeLatest } from 'redux-saga/effects'
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+
+//worker saga : FOR HELLO ACTION
+//spins a separate thread
+function* helloSaga() {
+    //dispatch an action to the store
+    yield put({ type: 'HELLO', message: 'hello world' })
+}
+
+
+//root saga/ main
+function* main() {
+    console.log('main starts')
+    //take + fork
+    //yield takeEvery('HELLOREQUEST', helloSaga)
+    yield takeLatest('HELLOREQUEST', helloSaga);
+
+    console.log('main ends')
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+//start sending HELLOREQUEST
+store.dispatch({ type: 'HELLOREQUEST' })
+///////////////////////////////////////////////////////////////////////////////////////
+
+main thread started it is waiting for REQUESTS(actions):
+........................................................
+
+main thread started, once one request(action) is processed and it is terminated.
+
+I want to make main thread as "dameon" thread. dont stop/terminate main.
+
+
+syntax ; 
+
+inside generator function, run while inifite loop with yield keyword makes deamon. 
+
+
+//demaon process
+function* run() {
+    while (true) {
+        yield 1;
+    }
+}
+const it = run()
+console.log(it.next());
+console.log(it.next());
+console.log(it.next());
+console.log(it.next());
+console.log(it.next());
+console.log(it.next());
+console.log(it.next());
+console.log(it.next());
+console.log(it.next());
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, take, fork, takeLatest } from 'redux-saga/effects'
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+function* hellosaga() {
+    yield put({ type: 'HELLO', message: 'Hello Saga' })
+}
+//root saga/ main
+function* main() {
+    console.log('main starts')
+    while (true) {
+        yield take('HELLOREQUEST')
+        yield fork(hellosaga)
+    }
+    console.log('main ends')
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+//start sending HELLOREQUEST
+store.dispatch({ type: 'HELLOREQUEST' })
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Side Effects:
+............
+
+1.async programming : callback pattern,promise pattern.
+
+//timer implemenation
+ delay effect.
+
+//promises
+
+
+delay:
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, delay, takeEvery, takeLatest } from 'redux-saga/effects'
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+
+//worker saga : FOR HELLO ACTION
+//spins a separate thread
+function* helloSaga() {
+    //dont dispatch HELLO action to the store,rather wait for some time
+    //block until timeout happens
+    yield delay(5000);
+    yield put({ type: 'HELLO', message: 'hello world' })
+}
+
+
+//root saga/ main
+function* main() {
+    console.log('main starts')
+    //take + fork
+    //yield takeEvery('HELLOREQUEST', helloSaga)
+    yield takeLatest('HELLOREQUEST', helloSaga);
+
+    console.log('main ends')
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+//start sending HELLOREQUEST
+store.dispatch({ type: 'HELLOREQUEST' })
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Promises:
+
+to call extnal function which may return promise /value 
+ 
+call effect
+
+normal function and call effect
+.................................
+
+//biz logic
+function getMessage() {
+    return "Hello World From the api"
+}
+
+//worker saga : FOR HELLO ACTION
+//spins a separate thread
+function* helloSaga() {
+    //call effect will block the generator , until the result is result is returned
+    let message = yield call(getMessage)
+    yield put({ type: 'HELLO', message: message })
+}
+
+function returns Promise and call effect
+........................................
+
+biz logic with promises
+
+
+Use case 1 : resolve
+function getMessage() {
+    return Promise.resolve('Hello I am from promise')
+}
+
+
+//worker saga : FOR HELLO ACTION
+//spins a separate thread
+function* helloSaga() {
+    //call effect will block the generator , until the result is result is returned
+    let message = yield call(getMessage)
+    yield put({ type: 'HELLO', message: message })
+}
+
+Use case 2 ; resolve and reject
+
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, call, takeEvery, takeLatest } from 'redux-saga/effects'
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        case 'ERROR':
+            return action.message
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+
+//api layer ; 
+
+function getUser() {
+    //mock data
+    let name = 'Subramanian';
+    //let name = null;
+    return new Promise((resolve, reject) => {
+        if (name) {
+            resolve(name);
+        } else {
+            reject('User Name not Found!!!');
+        }
+    });
+}
+
+
+//worker saga : FOR HELLO ACTION
+//spins a separate thread
+function* userSaga() {
+    try {
+        //call effect will block the generator , until the result is result is returned
+        let name = yield call(getUser)
+        let message = `Hello Mr ${name}`;
+        yield put({ type: 'HELLO', message: message })
+    }
+    catch (e) {
+        yield put({ type: 'ERROR', message: e })
+    }
+}
+
+
+//root saga/ main
+function* main() {
+    console.log('main starts')
+    yield takeLatest('HELLOREQUEST', userSaga);
+    console.log('main ends')
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+//start sending HELLOREQUEST
+store.dispatch({ type: 'HELLOREQUEST' })
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+How to write webservice calls and how to integrate with React
+
+-fetch api.
+ by default returns promise
+
+
+import { createStore, applyMiddleware } from 'redux'
+import createSagaMiddleware from 'redux-saga'
+import { put, takeEvery, takeLatest, delay, call } from 'redux-saga/effects'
+import { connect, Provider } from 'react-redux';
+import React from 'react';
+import { render } from 'react-dom';
+
+const FETCHUSERFAILED = 'FETCHUSERFAILED'
+const FETCHUSERSUCCESS = 'FETCHUSERSUCCESS'
+
+const reducer = (state = [], action) => {
+    const { type, users, err } = action;
+    switch (type) {
+        case FETCHUSERSUCCESS:
+            return state.concat(users);
+        case FETCHUSERFAILED:
+            return err
+        default:
+            return state;
+    }
+}
+
+const sagaMiddleWare = createSagaMiddleware();
+const store = createStore(reducer, applyMiddleware(sagaMiddleWare))
+
+
+//api
+function fetchUser(url) {
+    return fetch(url).then(res => res.json()); //returns promise
+}
+
+function* fetchUserSaga() {
+    try {
+        const url = 'https://jsonplaceholder.typicode.com/users'
+        const users = yield call(fetchUser, url);
+        //dispatch action
+        yield put({ type: FETCHUSERSUCCESS, users });
+
+    }
+    catch (e) {
+        yield put({ type: FETCHUSERFAILED, message: e.message });
+
+    }
+}
+
+
+//entry point
+function* root() {
+    yield takeLatest('FETCHUSER', fetchUserSaga)
+}
+
+sagaMiddleWare.run(root);
+/////////////////////////////////////////////////////////////////////////////////////
+
+function mapStateToProp(users) {
+    return {
+        users
+    }
+}
+//users component
+const UsersComponent = props => {
+    return <div>
+        <h1>Users List</h1>
+        <button onClick={() => {
+                 props.dispatch({ type: 'FETCHUSER' })
+        }}>Load Users</button>
+
+        <ul>
+            <h1>count {props.users.length}</h1>
+            {
+                props.users.map((user, index) => {
+                    return <li key={index}>
+                        <span>
+                            {user.username} {user.email}
+                        </span></li>
+                })
+            }
+        </ul>
+    </div>
+}
+const UserHOC = connect(mapStateToProp)(UsersComponent)
+const App = () => <>
+    <Provider store={store}>
+        <UserHOC />
+    </Provider>
+</>
+
+render(<App />, document.getElementById('root'));
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+# How to listen and run multiple sagas : modularity
+
+
+
+         
+        Product             Customer              Store      Payment
+           |                     |
+          state                state                ....       .......
+     ---------------         -------------
+           |                    |
+       ProductReducer         CustomerReducer
+	   |                         |                |            |
+      mapStateToProp           mapStateToProp      mapStateToProp mapStateToProp
+        (state)                   (state)           (state)        (state)
+         {reducer:{}}
+
+           |                        |                 |             |
+    -------------------------------------------------------------------------------------	
+	   |			      |		
+				    Store
+				     |
+                                root/main Thread(saga)
+                                      |
+                                 all([])--Effect : combine all sagas
+       ------------------------------------------------------------------------------------
+       |                              |                     |
+  CustomerModule(Saga)             ProductModule(saga) .................................
+       |
+ ------------------workers
+ |            |
+fetchCustomer creatCustomer
+
+         |
+			
+     ----------------------------------------------------------------------------------------
+				  React-Redux
+           |				|
+	------------------------------------------------------------------------------------
+        |                         |                      |              |
+     ProductContainer          CustomerContainer     StoreContainer  PaymentContainer
+         |
+    ProductSubContainer
+          |
+  ---------------------
+  |     |      |    |
+  Product Presentational
+       Components
+         |
+   Projection of Views
+
+
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, all,  takeLatest } from 'redux-saga/effects'
+
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        case 'HAI':
+            return action.message
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+
+//worker saga : FOR HELLO ACTION
+//spins a separate thread
+function* helloSaga() {
+    //dispatch an action to the store
+    yield put({ type: 'HELLO', message: 'hello world' })
+}
+
+function* haiSaga() {
+    //dispatch an action to the store
+    yield put({ type: 'HAI', message: 'hai' })
+}
+
+function* haiModule() {
+    yield takeLatest('HAIREQUEST', haiSaga);
+}
+
+function* helloModule() {
+    yield takeLatest('HELLOREQUEST', helloSaga);
+
+}
+
+
+//root saga/ main
+function* main() {
+    yield all([haiModule(), helloModule()]);
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+//start sending HELLOREQUEST
+store.dispatch({ type: 'HELLOREQUEST' })
+store.dispatch({ type: 'HAIREQUEST' })
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+# How to access "actions and state" inside saga?
+
+ you dispatch action--saga--dispatch actions- new state-->based on this state you want 
+to do something.
+
+ ----apicall-get result
+ ---based on that result --- fire another api
+
+output of one api will be input to another api.
+
+ to collect state 
+
+ "select" effect is used to grab redux current state.
+
+
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { put, all, take, takeLatest, takeEvery, select } from 'redux-saga/effects'
+
+
+//create saga middleware
+const sagaMiddleware = createSagaMiddleware();
+
+//reducer
+const GreeterReducer = (message = 'greet', action) => {
+    switch (action.type) {
+        case 'HELLO':
+            return action.message
+        case 'HAI':
+            return action.message
+        case 'SHOW_CONGRATULATION':
+            return 'You won I phone!!!!..Cheers'
+        default:
+            return message;
+    }
+}
+const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+store.subscribe(function () {
+    console.log(store.getState());
+})
+
+//wath and Log each action and observe state : Logger.
+
+function* watchAndLog() {
+    //watch all actions, each request grab its action and state
+    yield takeEvery('*', function* (action) {
+        //state : select effect get the current store state
+        const state = yield select();
+        console.log('action', action);
+        console.log('state', state);
+    })
+    //conditional listening : 
+    /**
+     * if an action called 'HAIREQUEST' is coming three times to the application
+     *  // you can watch conditionally.
+     */
+    //using loop
+    for (let i = 0; i < 3; i++) {
+        yield take('HAIREQUEST');
+    }
+    yield put({ type: 'SHOW_CONGRATULATION' })
+
+}
+
+
+//worker saga : FOR HELLO ACTION
+//spins a separate thread
+function* helloSaga() {
+    //dispatch an action to the store
+    yield put({ type: 'HELLO', message: 'hello world' })
+}
+
+function* haiSaga() {
+    //dispatch an action to the store
+    yield put({ type: 'HAI', message: 'hai' })
+}
+
+function* haiModule() {
+    yield takeLatest('HAIREQUEST', haiSaga);
+}
+
+function* helloModule() {
+    yield takeLatest('HELLOREQUEST', helloSaga);
+
+}
+
+
+//root saga/ main
+function* main() {
+    yield all([watchAndLog(), haiModule(), helloModule()]);
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+//start sending HELLOREQUEST
+//store.dispatch({ type: 'HELLOREQUEST' })
+store.dispatch({ type: 'HAIREQUEST' })
+store.dispatch({ type: 'HAIREQUEST' })
+store.dispatch({ type: 'HAIREQUEST' })
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+#Running multple api calls concurrcurrently and fetch results together:
+
+//user api
+
+    import { createStore, applyMiddleware } from 'redux';
+    import createSagaMiddleware from 'redux-saga';
+    import { put, all,call, take, takeLatest, takeEvery, select } from 'redux-saga/effects'
+
+
+    //create saga middleware
+    const sagaMiddleware = createSagaMiddleware();
+
+    //reducer
+    const GreeterReducer = (message = 'greet', action) => {
+        switch (action.type) {
+            case 'HELLO':
+                return action.message
+            case 'HAI':
+                return action.message
+            case 'SHOW_CONGRATULATION':
+                return 'You won I phone!!!!..Cheers'
+            default:
+                return message;
+        }
+    }
+    const store = createStore(GreeterReducer, applyMiddleware(sagaMiddleware));
+
+    store.subscribe(function () {
+        console.log(store.getState());
+    })
+
+    //wath and Log each action and observe state : Logger.
+
+    function* watchAndLog() {
+        //watch all actions, each request grab its action and state
+        yield takeEvery('*', function* (action) {
+            //state : select effect get the current store state
+            const state = yield select();
+            console.log('action', action);
+            console.log('state', state);
+        })
+        //conditional listening : 
+        /**
+         * if an action called 'HAIREQUEST' is coming three times to the application
+         *  // you can watch conditionally.
+         */
+        //using loop
+        for (let i = 0; i < 3; i++) {
+            yield take('HAIREQUEST');
+        }
+        yield put({ type: 'SHOW_CONGRATULATION' })
+
+    }
+
+
+    //worker saga : FOR HELLO ACTION
+    //spins a separate thread
+    function* helloSaga() {
+        //dispatch an action to the store
+        yield put({ type: 'HELLO', message: 'hello world' })
+    }
+
+    function* haiSaga() {
+        //dispatch an action to the store
+        yield put({ type: 'HAI', message: 'hai' })
+    }
+
+    function* haiModule() {
+        yield takeLatest('HAIREQUEST', haiSaga);
+    }
+
+    function* helloModule() {
+        yield takeLatest('HELLOREQUEST', helloSaga);
+
+    }
+    //concurrent api calls and grab results together.
+    function fetchData(url) {
+        return fetch(url).then(res => res.json());
+    }
+    function* fetchUsersAndComments() {
+        const commentsUrl = 'https://jsonplaceholder.typicode.com/comments'
+        const usersUrl = 'https://jsonplaceholder.typicode.com/users';
+        const [comments, users] = yield all([
+            call(fetchData, commentsUrl),
+            call(fetchData, usersUrl)
+        ]);
+        console.log(comments);
+        console.log(users);
+    }
+
+
+    //root saga/ main
+    function* main() {
+        yield all([fetchUsersAndComments(),watchAndLog(), haiModule(), helloModule()]);
+    }
+    //will kick start saga engine.
+    sagaMiddleware.run(main);
+
+    //start sending HELLOREQUEST
+    //store.dispatch({ type: 'HELLOREQUEST' })
+    store.dispatch({ type: 'HAIREQUEST' })
+    store.dispatch({ type: 'HAIREQUEST' })
+    store.dispatch({ type: 'HAIREQUEST' })
+
+
+
+
+
+//worker saga : FOR HELLO ACTION
+//spins a separate thread
+function* helloSaga() {
+    //dispatch an action to the store
+    yield put({ type: 'HELLO', message: 'hello world' })
+}
+
+function* haiSaga() {
+    //dispatch an action to the store
+    yield put({ type: 'HAI', message: 'hai' })
+}
+
+function* haiModule() {
+    yield takeLatest('HAIREQUEST', haiSaga);
+}
+
+function* helloModule() {
+    yield takeLatest('HELLOREQUEST', helloSaga);
+
+}
+//concurrent api calls and grab results together.
+function fetchData(url) {
+    return fetch(url).then(res => res.json());
+}
+function* fetchUsersAndComments() {
+    const commentsUrl = 'https://jsonplaceholder.typicode.com/comments'
+    const usersUrl = 'https://jsonplaceholder.typicode.com/users';
+    const [comments, users] = yield all([
+        call(fetchData, commentsUrl),
+        call(fetchData, usersUrl)
+    ]);
+    console.log(comments);
+    console.log(users);
+}
+
+
+//root saga/ main
+function* main() {
+    yield all([fetchUsersAndComments(),watchAndLog(), haiModule(), helloModule()]);
+}
+//will kick start saga engine.
+sagaMiddleware.run(main);
+
+//start sending HELLOREQUEST
+//store.dispatch({ type: 'HELLOREQUEST' })
+store.dispatch({ type: 'HAIREQUEST' })
+store.dispatch({ type: 'HAIREQUEST' })
+store.dispatch({ type: 'HAIREQUEST' })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
