@@ -1,0 +1,94 @@
+Back End:
+
+Node fundamentals
+
+Express lib
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+What is node?
+
+ node js is non blocking /Async io platform, to run javascript application.
+
+
+What is non blocking /async programming?
+
+Concurrency : 
+
+1.process level multi threading
+2.process level single threading  ; event loop /worker thread model.
+
+node has been built to write io applications(network) applications without process level mutli threading. rather than kernal level threads.
+
+Async programming is nothing but , tasks are executed by os kernal, results are handled by node runtime.
+
+Async programming implmentations:
+
+1.you need to pass function as parameter - handler function/ callback function
+
+2.that function must be mapped with high level javascript/node async apis
+
+
+how to know the program is async or not?
+
+1.you need to know node and js async api
+
+timers - settimeout,setinterval,setImmedate
+io  - read,write, files
+network - http,tcp related apis
+...........refer node api docs.
+
+
+Styles of async  programming:
+
+1.callback style : core style
+2.Promises
+3.async await
+//////////////////////////////////////////////////////////////////////////////////////////
+Writing async programming:
+
+1.callbacks
+
+//callback based async programming: 
+//timer api
+
+function task(whatTask) {
+    console.log(`${whatTask} Async task`)
+}
+console.log('start')
+setTimeout(task, 1000, 'WebServer');
+console.log('end')
+//
+function startHttpServer(callback) {
+    setTimeout(callback, 2000);
+}
+startHttpServer(function () {
+    console.log('Http Server is listening!')
+})
+/////////////////////////////////////////**********/////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

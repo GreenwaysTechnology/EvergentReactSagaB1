@@ -1,0 +1,284 @@
+import React, { Component, useRef, useState, useEffect } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+const sleep = ms => new Promise((reslove) => setTimeout(reslove, ms));
+
+const App = () => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const handleChangeName = (e) => {
+        setName(e.target.value);
+    }
+    const handleEmailChange = (e) => {
+        setEmail(e.target.value);
+    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        await sleep(1000)
+        alert({ name, email }, null, 2);
+    }
+    return <>
+        <form onSubmit={handleSubmit}>
+            <label>Name :</label>
+            <input type="text" value={name} onChange={handleChangeName} />
+            <label>Email :</label>
+            <input type="email" value={email} onChange={handleEmailChange} />
+            <button type="submit" >Submit</button>
+        </form>
+    </>
+}
+
+render(<App />, document.getElementById('root'));
+
+v2
+
+separate components into hooks
+import React, { Component, useRef, useState, useEffect } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+//create FormikHooks
+const useFormik = props => {
+    const [values, setValues] = useState(props.initalValues || {});
+    const handleChange = name => event => {
+        event.persist()
+        setValues(prev => ({ ...prev, [name]: event.target.value }));
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        props.onSubmit(values);
+    }
+    return { values, handleChange, handleSubmit };
+}
+
+
+const sleep = ms => new Promise((reslove) => setTimeout(reslove, ms));
+
+const App = () => {
+
+    const { values, handleChange, handleSubmit } = useFormik({
+        initalValues: {
+            name: '',
+            email: ''
+        },
+        onSubmit: async (values) => {
+            await sleep(1000);
+            alert(JSON.stringify(values));
+        }
+    });
+
+    return <>
+        <form onSubmit={handleSubmit}>
+            <label>Name :</label>
+            <input type="text" value={values.name} onChange={handleChange('name')} />
+            <label>Email :</label>
+            <input type="email" value={values.email} onChange={handleChange('email')} />
+            <button type="submit" >Submit</button>
+            <pre>{JSON.stringify(values)}</pre>
+        </form>
+    </>
+}
+
+render(<App />, document.getElementById('root'));
+///////////////////////////////////////////////////////////////////////////////////////////
+
+V3 ; ADD Email using formkik 
+
+import React, { Component, useRef, useState, useEffect } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+import { useFormik } from 'formik';
+
+
+
+const SignupForm = () => {
+    // Pass the useFormik() hook initial form values and a submit function that will
+    // be called when the form is submitted
+    const formik = useFormik({
+        initialValues: {
+            email: '',
+        },
+        onSubmit: values => {
+            alert(JSON.stringify(values, null, 2));
+        },
+    });
+    return (
+        <form onSubmit={formik.handleSubmit}>
+            <label htmlFor="email">Email Address</label>
+            <input
+                id="email"
+                name="email"
+                type="email"
+                onChange={formik.handleChange}
+                value={formik.values.email}
+            />
+            <button type="submit">Submit</button>
+        </form>
+    );
+};
+render(<SignupForm />, document.getElementById('root'));
+//////////////////////////////////////////////////////////////////////////////////
+
+Validation:
+import React, { Component, useRef, useState, useEffect } from 'react';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+import { useFormik } from 'formik';
+
+
+
+
+// A custom validation function. This must return an object
+// which keys are symmetrical to our values/initialValues
+const validate = values => {
+  const errors = {};
+  if (!values.firstName) {
+    errors.firstName = 'Required';
+  } else if (values.firstName.length > 15) {
+    errors.firstName = 'Must be 15 characters or less';
+  }
+
+  if (!values.lastName) {
+    errors.lastName = 'Required';
+  } else if (values.lastName.length > 20) {
+    errors.lastName = 'Must be 20 characters or less';
+  }
+
+  if (!values.email) {
+    errors.email = 'Required';
+  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
+    errors.email = 'Invalid email address';
+  }
+
+  return errors;
+};
+
+const SignupForm = () => {
+  // Pass the useFormik() hook initial form values and a submit function that will
+  // be called when the form is submitted
+  const formik = useFormik({
+    initialValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+    },
+    validate,
+    onSubmit: values => {
+      alert(JSON.stringify(values, null, 2));
+    },
+  });
+  return (
+    <form onSubmit={formik.handleSubmit}>
+      <label htmlFor="firstName">First Name</label>
+      <input
+        id="firstName"
+        name="firstName"
+        type="text"
+        onChange={formik.handleChange}
+        value={formik.values.firstName}
+      />
+      {formik.errors.firstName ? <div>{formik.errors.firstName}</div> : null}
+      <label htmlFor="lastName">Last Name</label>
+      <input
+        id="lastName"
+        name="lastName"
+        type="text"
+        onChange={formik.handleChange}
+        value={formik.values.lastName}
+      />
+      {formik.errors.lastName ? <div>{formik.errors.lastName}</div> : null}
+      <label htmlFor="email">Email Address</label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        onChange={formik.handleChange}
+        value={formik.values.email}
+      />
+      {formik.errors.email ? <div>{formik.errors.email}</div> : null}
+      <button type="submit">Submit</button>
+    </form>
+  );
+};
+render(<SignupForm />, document.getElementById('root'));
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Using Yup lib:
+
+import React from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+
+const SignupForm = () => {
+    const formik = useFormik({
+        initialValues: {
+            firstName: '',
+            lastName: '',
+            email: '',
+        },
+        validationSchema: Yup.object({
+            firstName: Yup.string()
+                .max(15, 'Must be 15 characters or less')
+                .required('Required'),
+            lastName: Yup.string()
+                .max(20, 'Must be 20 characters or less')
+                .required('Required'),
+            email: Yup.string()
+                .email('Invalid email address')
+                .required('Required'),
+        }),
+        onSubmit: values => {
+            alert(JSON.stringify(values, null, 2));
+        },
+    });
+    return (
+        <form onSubmit={formik.handleSubmit}>
+            <label htmlFor="firstName">First Name</label>
+            <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.firstName}
+            />
+            {formik.touched.firstName && formik.errors.firstName ? (
+                <div>{formik.errors.firstName}</div>
+            ) : null}
+            <label htmlFor="lastName">Last Name</label>
+            <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.lastName}
+            />
+            {formik.touched.lastName && formik.errors.lastName ? (
+                <div>{formik.errors.lastName}</div>
+            ) : null}
+            <label htmlFor="email">Email Address</label>
+            <input
+                id="email"
+                name="email"
+                type="email"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.email}
+            />
+            {formik.touched.email && formik.errors.email ? (
+                <div>{formik.errors.email}</div>
+            ) : null}
+            <button type="submit">Submit</button>
+        </form>
+    );
+};
+render(<div className="container">
+    <SignupForm />
+</div>, document.getElementById('root'));
+
