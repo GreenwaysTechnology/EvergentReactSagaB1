@@ -1,16 +1,25 @@
-//callback based async programming: 
-//timer api
+//networking : http
+const http = require('http');
 
-function task(whatTask) {
-    console.log(`${whatTask} Async task`)
-}
-console.log('start')
-setTimeout(task, 1000, 'WebServer');
-console.log('end')
-//
-function startHttpServer(callback) {
-    setTimeout(callback, 2000);
-}
-startHttpServer(function () {
-    console.log('Http Server is listening!')
-})
+//non blocking web servers and web apps
+
+//create server
+
+const server = http.createServer(function (req, res) {
+    //handle request and response
+    res.write('<h1>Hello Node Web App</h1>');
+    //close the stream
+    res.end();
+
+});
+
+//start server
+server.listen(3000, function () {
+    console.log('Server listens')
+});
+
+//server events
+server.on('request', function (req, res) {
+    console.log(`${req.url} - ${req.method}`)
+});
+
