@@ -1137,5 +1137,885 @@ server.listen(3000, function () {
 server.on('request', function (req, res) {
     console.log(`${req.url} - ${req.method}`)
 });
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+//How to send data?
+
+JSON data.
+const TODOService = require('./services/TODOService');
+const { createServer } = require('http');
+
+const { findAllTodosUsingPromise } = new TODOService();
+//todo app : Controller
+const server = createServer(async (req, res) => {
+
+    res.writeHead(200, {
+        'Content-Type': 'application/json'
+    })
+    try {
+        const todos = await findAllTodosUsingPromise();
+        res.write(JSON.stringify(todos));
+    }
+    catch (err) {
+        res.write(JSON.stringify(err));
+    }
+    res.end();
+
+});
+
+server.listen(3000, function () {
+    console.log('Server is Ready!');
+});
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Can i build real time web apps using http module alone?
+
+Yes, but very complex:
+
+complexity in the core http module:
+...................................
+
+1.url and method /api/todos -GET ,POST,
+2.No proper modularity.
+
+Developer only has to focus application logics only.
+
+Solution:
+
+frameworks and libs
+
+frameworks : express js
+
+What is express js?
+ express js is a very small framework built by node core team, even first framework on node
+on http core module.
+
+express js is used to build web applications and web services.
+
+how to start working with express js?
+
+Third party node modules.
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 
+npm: node package manager :  
+  tool used to publish,install,manage node modules provided by thrid parties.
+
+npm repositry : npmjs.com /org
+
+provider
+  Who publish node modules into npmjs registry
+consumer
+  who consumes/installs node modules into their projects.
+
+according to npm, every javascript project must have one file called "package.json"
+
+package.json project meta file.
+
+create package.json file
+
+$npm init
+
+{
+  "name": "mynode-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
+
+how to install, uninstall packages?
+node_modules folder where all thrid party modules are installed.
+
+npm command 
+
+npm install(i) modulename --options
+
+--options
+
+--save
+--save-dev
+--production
+-g
+
+modules can be dived into three categaory
+
+1.only development
+  eg: testing
+2.development and production
+  eg : react
+3.tooling - only development
+  webservers,compilers.....
+
+ options can help us to divide modules according to use case.
+
+
+
+--save; is optional 
+
+eg:
+ npm install module name
+ npm install module name --save
+
+ npm i  lodash --save
+
+2.development and production
+"dependencies": {
+    "lodash": "^4.17.15"
+  }
+
+uninstall
+npm uninstall lodash --save
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+Development modules && tools:
+
+Testing: unit testing
+
+"devDependencies": {
+    "chai": "^4.2.0"
+  }
+
+
+Testing common concepts:
+
+1.assertion libs
+2.test runtime
+
+                                      
+                                       assertions(chai,React Testing Library,Enzyme)
+					     |
+				       Test Runtime -(mocha,jasmin,jest,Karama,Protractor)
+					    |
+                                        Node -Runtime
+
+mocha is tool.
+
+mocha can be installed to run chai assertions
+
+mocha tool is available as global.: not installed in the local project, available like
+shellscripts,bat files windows.
+
+C:\Users\sasub\AppData\Roaming\npm\mocha
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Drawbacks of global modules:
+............................
+
+1.version mismatch across multi projects
+
+Solution :
+
+install global modules as local modules(--save-dev module)
+
+
+>npm install mocha --save-dev
+
+
+how to run mocha now?
+
+ >mocha
+
+'mocha' is not recognized as an internal or external command,
+operable program or batch file
+
+why? you can access only global modules like above
+
+then how to use?
+
+"scripts" :
+
+ is used for automation.
+
+"command" : "task to be excuted"
+
+npm provides lot of built in commaands
+
+ -test,start,....
+
+ "scripts": {
+    "test": "mocha"
+  }
+
+how to run this?
+
+ "scripts": {
+    "test": "mocha",
+     "start" : "node src/index.js"
+  }
+ 
+ npm test
+ npm start
+
+scripts command even can be custom commands
+
+ "subu" : "node src/index.js"
+
+how to run this?
+
+ npm run subu
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+webpack:
+
+For build process
+ -compilation ; es6 to es5
+ 
+npm i webpack webpack-cli --save-dev
+
+const path = require('path');
+
+module.exports = {
+    entry: './src/index.js',
+    mode: 'production',
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'bundle.js'
+    }
+};
+
+  "scripts": {
+    "test": "mocha",
+    "start": "node src/index.js",
+    "subu": "node src/index.js",
+    "build": "webpack --watch"
+  },
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+Express application:
+...................
+
+install express framework
+
+start creating rest end points
+
+Rest points;
+
+
+URL ,METHODS
+
+Express core concepts:
+
+In express every object is object
+
+1.Application object
+2.request object
+3.response object
+4.router object
+
+1.Application object
+  container object , which contains other objects
+
+create application object
+
+start create rest end points.
+
+
+//express application
+const express = require('express') // returns a function, used to create application object
+
+//create application object
+const app = express();
+
+
+//rest end points
+//home page
+app.get('/', (req, res) => {
+    res.send('<h1>Evergent REST API Server</h1>')
+});
+
+//todos
+app.get('/api/todos/list', (req, res) => {
+    res.send('todos -list')
+})
+
+app.post('/api/todos', (req, res) => {
+    res.send('todos -post')
+})
+
+app.put('/api/todos', (req, res) => {
+    res.send('todos -put')
+})
+
+app.delete('/api/todos', (req, res) => {
+    res.send('todos -delete')
+})
+//to start and listen server
+
+app.listen(3000, function () {
+    console.log('Express server is ready!!!');
+});
+
+adding with node monitor; nodemon
+
+"scripts": {
+    "start": "nodemon src/app.js"
+  }
+
+const TODOS = require('../mockdata/TODOS');
+
+class TodoService {
+    constructor() { }
+    findAll() {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, 1000, TODOS);
+        });
+    }
+    findById(id) {
+        return new Promise((resolve, reject) => {
+            const filteredTodo = TODOS.filter((todo, index) => {
+                return todo.id === parseInt(id);
+            })
+            if (filteredTodo && filteredTodo.length > 0) {
+                resolve(filteredTodo)
+            } else {
+                reject({ message: 'No todo' })
+            }
+        });
+    }
+}
+module.exports = new TodoService();
+
+//express application
+const express = require('express') // returns a function, used to create application object
+const { findAll, findById } = require('./services/TODOService');
+
+//create application object
+const app = express();
+
+
+//rest end points
+//home page
+app.get('/', (req, res) => {
+    res.send('<h1>Evergent REST API Server</h1>')
+});
+
+//todos : controller
+app.get('/api/todos/list', async (req, res) => {
+
+    try {
+        const todos = await findAll();
+        res.json(todos);
+    }
+    catch (err) {
+        res.json(err);
+    }
+
+})
+
+// /api/todos/1
+app.get('/api/todos/:id', async (req, res) => {
+    const id = req.params.id;
+    try {
+        const todos = await findById(id);
+        res.json(todos);
+    }
+    catch (err) {
+        res.json(err);
+    }
+
+})
+
+app.post('/api/todos', (req, res) => {
+    res.send('todos -post')
+})
+
+app.put('/api/todos', (req, res) => {
+    res.send('todos -put')
+})
+
+app.delete('/api/todos', (req, res) => {
+    res.send('todos -delete')
+})
+//to start and listen server
+
+app.listen(3000, function () {
+    console.log('Express server is ready!!!');
+});
+///////////////////////////////////////////////////////////////////////////////////////////
+
+How to build modular domain driven apis?
+
+domains 
+todos   customer users  product .................
+
+
+/api/todos
+ GET
+ POST
+ DELETE
+ PUT
+
+/api/customer
+ GET
+ POST
+ DELETE
+ PUT
+
+/api/users
+ GET
+ POST
+ DELETE
+ PUT
+
+/api/products
+ GET
+ POST
+ DELETE
+ PUT
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+                                           (Domain Controller)         Service Layer             Data
+											        Source			
+
+                                            |----UserController   <--->  UserService <-->    Mongo/mssql/oracle/third party end point
+       /api/users                           |   (GET,POST,DELETE)
+View---/api/todos----http--|GateWay Router--|----TODOSController 
+       /api/products       (app.js)         |   (GET,POST,DELETE)
+                                            |----ProductController
+						 (GET,POST,DELETE)
+
+
+
+Gateway is other wise called as "Front Controller"
+
+
+
+services
+
+const TODOS = require('../mockdata/TODOS');
+
+class TodoService {
+    constructor() { }
+    findAll() {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, 1000, TODOS);
+        });
+    }
+    findById(id) {
+        return new Promise((resolve, reject) => {
+            const filteredTodo = TODOS.filter((todo, index) => {
+                return todo.id === parseInt(id);
+            })
+            if (filteredTodo && filteredTodo.length > 0) {
+                resolve(filteredTodo)
+            } else {
+                reject({ message: 'No todo' })
+            }
+        });
+    }
+}
+module.exports = new TodoService();
+
+const USERS = require('../mockdata/Users');
+
+class UserService {
+    constructor() { }
+    findAll() {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, 1000, USERS);
+        });
+    }
+    findById(id) {
+        return new Promise((resolve, reject) => {
+            const filteredUser = USERS.filter((user, index) => {
+                return user.id === parseInt(id);
+            })
+            if (filteredUser && filteredUser.length > 0) {
+                resolve(filteredUser)
+            } else {
+                reject({ message: 'No Users' })
+            }
+        });
+    }
+}
+module.exports = new UserService();
+
+
+const TODOS = require('../mockdata/TODOS');
+
+class TodoService {
+    constructor() { }
+    findAll() {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, 1000, TODOS);
+        });
+    }
+    findById(id) {
+        return new Promise((resolve, reject) => {
+            const filteredTodo = TODOS.filter((todo, index) => {
+                return todo.id === parseInt(id);
+            })
+            if (filteredTodo && filteredTodo.length > 0) {
+                resolve(filteredTodo)
+            } else {
+                reject({ message: 'No todo' })
+            }
+        });
+    }
+}
+module.exports = new TodoService();
+
+Controllers:
+const express = require('express');
+const { findAll, findById } = require('../services/TODOService');
+
+
+//create router object
+const todocontroller = express.Router();
+
+
+//todos : controller
+todocontroller.get('/list', async (req, res) => {
+
+    try {
+        const todos = await findAll();
+        res.json(todos);
+    }
+    catch (err) {
+        res.json(err);
+    }
+
+})
+
+// /api/todos/1
+todocontroller.get('/:id', async (req, res) => {
+    const id = req.params.id;
+    try {
+        const todos = await findById(id);
+        res.json(todos);
+    }
+    catch (err) {
+        res.json(err);
+    }
+
+})
+
+todocontroller.post('/', (req, res) => {
+    res.send('todos -post')
+})
+
+todocontroller.put('/:id', (req, res) => {
+    res.send('todos -put')
+})
+
+todocontroller.delete('/:id', (req, res) => {
+    res.send('todos -delete')
+})
+
+//exports controller
+module.exports = todocontroller;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+const express = require('express');
+const { findAll, findById } = require('../services/UserService');
+
+
+//create router object
+const usercontroller = express.Router();
+
+
+//todos : controller
+usercontroller.get('/list', async (req, res) => {
+
+    try {
+        const users = await findAll();
+        res.json(users);
+    }
+    catch (err) {
+        res.json(err);
+    }
+
+})
+
+// /api/todos/1
+usercontroller.get('/:id', async (req, res) => {
+    const id = req.params.id;
+    try {
+        const todos = await findById(id);
+        res.json(users);
+    }
+    catch (err) {
+        res.json(err);
+    }
+
+})
+
+usercontroller.post('/', (req, res) => {
+    res.send('users -post')
+})
+
+usercontroller.put('/:id', (req, res) => {
+    res.send('users -put')
+})
+
+usercontroller.delete('/:id', (req, res) => {
+    res.send('users -delete')
+})
+
+//exports controller
+module.exports = usercontroller;
+
+//express application
+const express = require('express') // returns a function, used to create application object
+const TodoController = require('./controllers/todocontroller');
+const UserController = require('./controllers/userscontroller')
+
+//create application object
+const app = express();
+
+// /api/todos/list : redirect to the TODOS Controller.
+app.use('/api/todos', TodoController)
+// /api/users/list : redirect to the USERS Controller
+app.use('/api/users', UserController)
+
+
+
+//rest end points
+//home page
+app.get('/', (req, res) => {
+    res.send('<h1>Evergent REST API Server</h1>')
+});
+
+
+//to start and listen server
+app.listen(3000, function () {
+    console.log('Express server is ready!!!');
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+how to send data : post,put ;
+...........................
+
+todocontroller.post('/', async (req, res) => {
+
+    try {
+        const todos = await findAll();
+
+        //how to read read.
+        //attach data event to read data
+        let data = '';
+        req.on('data', (chunk) => {
+            //read request pay load
+            //console.log(chunk.length)
+            data += chunk;
+        });
+        //attach end event to ensure , data read operation is completed and then send response
+        req.on('end', () => {
+            console.log(data);
+            res.json(todos.concat(JSON.parse(data)));
+        });
+
+
+    }
+    catch (err) {
+        res.json(err);
+    }
+
+})
+middlewares:
+............
+
+express application is growing based on middlewares(plugins)
+
+for express there 1000 middlewares available.
+
+What is middleware?
+
+a function which has three parameters -  req,response,next
+
+Types of middlewares
+
+1.custom middlewares
+3.built in middlewares
+4.third party middlewares
+
+
+Types of middlewares based on location(where we declare)
+
+1.app middleware/ global middleware
+2.route specfic middlewares
+3.url specific middlewares-  either app /route
+
+what middlewares will have 
+
+1.execute any biz logic code which is isloated from real request handlers.
+
+2.make changes to the request and response object
+
+
+middlewares can be chained together in order to achive common functions
+
+eg:
+
+
+                                next--is reference to move from one m1 to another m2
+view--http--request-----|server--m1--m2---m3--requesthandler---response--->
+
+
+
+steps:
+
+1.write middleware
+2.attach middleware with application --- app.use
+
+To read json values from user without req.on events
+
+bodyParser - middleware
+
+
+Database connection:
+
+const mongojs = require('mongojs')
+//get the database
+const db = mongojs('BooksDb')
+//get the table
+const books = db.collection('books')
+
+class BooksService {
+    findAll() {
+        return new Promise((resolve, reject) => {
+            db.books.find(function (error, docs) {
+                if (error) {
+                    reject(error);
+                }
+                else {
+                    resolve(docs);
+                }
+            });
+        });
+
+    }
+}
+
+module.exports = new BooksService();
+
+
+//express application
+const express = require('express') // returns a function, used to create application object
+
+const TodoController = require('./controllers/todocontroller');
+const UserController = require('./controllers/userscontroller')
+const BooksController = require('./controllers/bookscontroller');
+
+const bodyParser = require('body-parser')
+
+
+//create application object
+const app = express();
+
+//body parser middleware
+app.use(bodyParser.json())
+
+
+//custom middleware
+//i want to show url an method and date of request every time when user requests
+
+app.use(function (req, res, next) {
+    console.log(`URL ${req.path} Method ${req.method} ${new Date()}`)
+    //call next 
+    next();
+});
+
+
+
+// /api/todos/list : redirect to the TODOS Controller.
+app.use('/api/todos', TodoController)
+// /api/users/list : redirect to the USERS Controller
+app.use('/api/users', UserController)
+app.use('/api/books', BooksController)
+
+
+
+
+//rest end points
+//home page
+app.get('/', (req, res) => {
+    res.send('<h1>Evergent REST API Server</h1>')
+});
+
+
+//to start and listen server
+app.listen(3000, function () {
+    console.log('Express server is ready!!!');
+});
+////////////////////////////////////////////////////////////////////////////////////////////
+
+How to build express application faster?
+
+express generator;
+
+1.create project layout with common middlewares
+
+2.can be ready for two types of application
+ 1.rest end point
+ 2.dynamic web application - like php,springmvc with views,aspx
+
+express and view layer
+  -templates - hbs..
+
+Explorations on middlewares
+
+1.logger
+2.authentication
+3.thrid party integration middleares
+etc.........................................
+/////////////////////////////////////////////////////////////////////////////////////////
+
+Conculsion
+
+                   ES6-->React--->Redux--->Saga--->Node--->Express
+
+MERN STACK - REACT FULLSTACK ON JS
+MEAN STACK -ANGULAR FULLSTACK ON JS
+
+Deployment:
+
+ src
+  -Dockerfile
+  -docker-compose.yml
+    build: .
+     
+Dockerfile:
+
+FROM node:12
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package*.json ./
+
+RUN npm install
+# If you are building your code for production
+# RUN npm ci --only=production
+
+# Bundle app source
+COPY . .
+
+EXPOSE 8080
+CMD [ "node", "app.js" ]
+
+docker build -t app:1.0 .
+
+docker-compose up
+
+
+
+Apache benchmark------>
+
+Testing:
+https://testing-library.com/docs/react-testing-library/example-intro
+https://enzymejs.github.io/enzyme/

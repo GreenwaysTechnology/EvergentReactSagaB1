@@ -1,25 +1,12 @@
-//networking : http
-const http = require('http');
+//how to use lodash third party module
 
-//non blocking web servers and web apps
+const array = require('lodash/array');
 
-//create server
-
-const server = http.createServer(function (req, res) {
-    //handle request and response
-    res.write('<h1>Hello Node Web App</h1>');
-    //close the stream
-    res.end();
-
-});
-
-//start server
-server.listen(3000, function () {
-    console.log('Server listens')
-});
-
-//server events
-server.on('request', function (req, res) {
-    console.log(`${req.url} - ${req.method}`)
-});
-
+var myarray = [1];
+var other = array.concat(myarray, 2, [3], [[4]]);
+ 
+console.log(other);
+// => [1, 2, 3, [4]]
+ 
+console.log(myarray);
+// => [1]
